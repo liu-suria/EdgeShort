@@ -1,13 +1,14 @@
 import {
-  getLinkStore, json, listRecords, makeCode, makeRecordId, normaliseCode,
-  normaliseTitle, normaliseUrl, publicRecord, readJson, requireAuth, saveNewRecord,
+  json, makeCode, makeRecordId, normaliseCode, normaliseTitle, normaliseUrl,
+  publicRecord, readJson, requireAuth,
 } from "../../../_lib.js";
+import { getLinkStore, listRecords, saveNewRecord } from "../../../_storage.js";
 
 export async function onRequestGet(context) {
   const auth = await requireAuth(context);
   if (auth.response) return auth.response;
   try {
-    const links = await listRecords(getLinkStore());
+    const links = await listRecords(getLinkStore(), publicRecord);
     const query = new URL(context.request.url).searchParams.get("q")?.trim().toLowerCase();
     const filtered = query ? links.filter((link) => [link.code, link.url, link.title].join(" ").toLowerCase().includes(query)) : links;
     return json({ links: filtered, total: filtered.length });
