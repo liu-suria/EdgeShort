@@ -1,6 +1,6 @@
 .DS_Store
+node_modules/
 .edgeone/
 .env
 .env.*
 !.env.example
-

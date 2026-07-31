@@ -1,20 +1,21 @@
-import { getKv, getRecord } from "../_lib.js";
+import { getLinkStore, getRecord, saveRecord } from "../_lib.js";
 
 export async function onRequestGet(context) {
   try {
-    const link = await getRecord(getKv(context), context.params?.code);
+    const store = getLinkStore();
+    const link = await getRecord(store, context.params?.code, "eventual");
     if (!link?.url) return new Response("Short link not found", {
       status: 404,
       headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
     });
     const countVisit = async () => {
-      // KV has no atomic increment. This is intentionally best-effort, which is
-      // appropriate for a personal shortener and avoids delaying the redirect.
-      const current = await getRecord(getKv(context), link.code);
+      // Blob writes do not have an atomic increment. Use a strongly consistent
+      // read, then update in the background so redirects remain fast.
+      const current = await getRecord(store, link.code);
       if (!current) return;
       current.visits = (Number(current.visits) || 0) + 1;
       current.updatedAt = current.updatedAt || new Date().toISOString();
-      await getKv(context).put(`url_${link.code}`, JSON.stringify(current));
+      await saveRecord(store, current);
     };
     if (typeof context.waitUntil === "function") context.waitUntil(countVisit().catch(() => {}));
     else countVisit().catch(() => {});

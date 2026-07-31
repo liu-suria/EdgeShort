@@ -1,4 +1,7 @@
+import { getStore } from "@edgeone/pages-blob";
+
 const encoder = new TextEncoder();
+const STORE_NAME = "edgeshort-links";
 
 // The __Host- prefix prevents a subdomain from setting a competing session cookie.
 export const COOKIE_NAME = "__Host-edgeshort_session";
@@ -24,14 +27,10 @@ export function methodNotAllowed() {
   return json({ error: "Method not allowed" }, 405, { Allow: "GET, POST, PATCH, DELETE" });
 }
 
-export function getKv(context) {
-  // KV bindings are exposed by Makers as runtime globals. Some local adapters
-  // additionally expose them via context.env, so support both forms.
-  const kv = context?.env?.URLS_KV || globalThis.URLS_KV;
-  if (!kv || typeof kv.get !== "function") {
-    throw new Error("KV binding URLS_KV is not configured");
-  }
-  return kv;
+export function getLinkStore() {
+  // Makers creates this Blob namespace automatically on its first use. No
+  // dashboard binding or storage credential is needed inside an Edge Function.
+  return getStore(STORE_NAME);
 }
 
 export function getSecrets(context) {
@@ -150,12 +149,22 @@ export function normaliseTitle(input) {
 }
 
 export function recordKey(code) {
-  return `url_${code}`;
+  return `links/${code}.json`;
 }
 
-export async function getRecord(kv, code) {
-  const record = await kv.get(recordKey(code), { type: "json" });
+export async function getRecord(store, code, consistency = "strong") {
+  const record = await store.get(recordKey(code), { type: "json", consistency });
   return record && typeof record === "object" ? record : null;
+}
+
+export async function saveNewRecord(store, record) {
+  await store.setJSON(recordKey(record.code), record, { onlyIfNew: true });
+  const saved = await getRecord(store, record.code);
+  return saved?.id === record.id;
+}
+
+export async function saveRecord(store, record) {
+  await store.setJSON(recordKey(record.code), record);
 }
 
 export function publicRecord(record) {
@@ -177,6 +186,10 @@ export function makeCode() {
   return code;
 }
 
+export function makeRecordId() {
+  return toBase64Url(crypto.getRandomValues(new Uint8Array(18)));
+}
+
 export async function readJson(request) {
   const contentLength = Number(request.headers.get("Content-Length") || 0);
   if (contentLength > 10_240) throw new Error("Request body is too large");
@@ -191,19 +204,11 @@ export async function readJson(request) {
   }
 }
 
-export async function listRecords(kv) {
-  const keys = [];
-  let cursor;
-  let pages = 0;
-  do {
-    const result = await kv.list({ prefix: "url_", limit: 256, ...(cursor ? { cursor } : {}) });
-    keys.push(...(result.keys || []).map((item) => item.key));
-    cursor = result.cursor;
-    pages += 1;
-    if (pages > 20) throw new Error("Too many links to list in one request");
-  } while (cursor);
-  const records = await Promise.all(keys.map(async (key) => {
-    const value = await kv.get(key, { type: "json" });
+export async function listRecords(store) {
+  const { blobs = [] } = await store.list({ prefix: "links/", consistency: "strong" });
+  if (blobs.length > 5_000) throw new Error("Too many links to list in one request");
+  const records = await Promise.all(blobs.map(async ({ key }) => {
+    const value = await store.get(key, { type: "json", consistency: "strong" });
     return value && typeof value === "object" ? publicRecord(value) : null;
   }));
   return records.filter(Boolean).sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
