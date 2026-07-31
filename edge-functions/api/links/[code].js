@@ -1,7 +1,7 @@
 import {
   json, normaliseTitle, normaliseUrl, publicRecord, readJson, requireAuth,
-} from "../../../_lib.js";
-import { getLinkStore, getRecord, recordKey, saveRecord } from "../../../_storage.js";
+} from "../../_lib.js";
+import { getLinkStore, getRecord, recordKey, saveRecord } from "../../_storage.js";
 
 function codeFrom(context) {
   return context.params?.code;

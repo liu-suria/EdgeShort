@@ -1,4 +1,4 @@
-import { getLinkStore, getRecord, saveRecord } from "../_storage.js";
+import { getLinkStore, getRecord, saveRecord } from "./_storage.js";
 
 export async function onRequestGet(context) {
   try {

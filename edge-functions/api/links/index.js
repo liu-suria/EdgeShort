@@ -1,8 +1,8 @@
 import {
   json, makeCode, makeRecordId, normaliseCode, normaliseTitle, normaliseUrl,
   publicRecord, readJson, requireAuth,
-} from "../../../_lib.js";
-import { getLinkStore, listRecords, saveNewRecord } from "../../../_storage.js";
+} from "../../_lib.js";
+import { getLinkStore, listRecords, saveNewRecord } from "../../_storage.js";
 
 export async function onRequestGet(context) {
   const auth = await requireAuth(context);
