@@ -6,12 +6,12 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0b1020">
     <title>EdgeShort — 管理后台</title>
-    <link rel="stylesheet" href="/admin/style.css?v=20260731-3">
+    <link rel="stylesheet" href="/admin/style.css?v=20260731-4">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="EdgeShort 首页"><span class="brand-mark">↗</span><span>EdgeShort</span></a>
+        <a class="brand" href="/" aria-label="EdgeShort 首页"><span class="brand-mark">↗</span><span>EdgeShort</span><span class="brand-divider"></span><small data-i18n="adminConsole">链接管理</small></a>
         <div class="top-actions"><button class="language-button" id="language-toggle" type="button" aria-label="切换至英文">EN</button><button class="button button-quiet" id="sign-out" type="button" hidden data-i18n="signOut">退出登录</button></div>
       </header>
 
@@ -33,12 +33,14 @@
         <section class="dashboard" id="dashboard" hidden>
           <div class="page-intro">
             <div><span class="eyebrow" data-i18n="yourLinks">你的短链接</span><h1 data-i18n="shortLinksTitle">所有短链接，尽在一处。</h1><p data-i18n="shortLinksDescription">创建、管理和追踪每一条链接。</p></div>
+            <div class="intro-side"><span class="sync-status"><i></i><span data-i18n="storageReady">存储已就绪</span></span>
             <button class="button button-primary" id="new-link" type="button"><span aria-hidden="true">＋</span> <span data-i18n="newLink">新建链接</span></button>
+            </div>
           </div>
 
           <section class="stats" aria-label="Link statistics">
-            <div class="stat-card"><span data-i18n="totalLinks">链接总数</span><strong id="total-links">0</strong></div>
-            <div class="stat-card"><span data-i18n="totalVisits">访问总数</span><strong id="total-visits">0</strong></div>
+            <div class="stat-card"><span class="stat-icon">↗</span><div><span data-i18n="totalLinks">链接总数</span><strong id="total-links">0</strong></div></div>
+            <div class="stat-card"><span class="stat-icon visits-icon">⌁</span><div><span data-i18n="totalVisits">访问总数</span><strong id="total-visits">0</strong></div></div>
           </section>
 
           <section class="links-panel" aria-labelledby="links-heading">
@@ -57,15 +59,15 @@
       <form class="dialog-card" id="link-form" method="dialog">
         <div class="dialog-header"><div><span class="eyebrow" id="dialog-eyebrow">新建链接</span><h2 id="dialog-title">新建短链接</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="关闭">×</button></div>
         <input type="hidden" id="editing-code">
-        <label for="link-url"><span data-i18n="destinationUrl">目标链接</span> <span>*</span></label><input id="link-url" type="url" inputmode="url" placeholder="https://example.com/long-link" required>
-        <label for="link-title"><span data-i18n="label">备注名称</span> <small data-i18n="optional">可选</small></label><input id="link-title" type="text" maxlength="120" placeholder="例如：夏日活动" data-i18n-placeholder="labelPlaceholder">
-        <div id="code-wrap"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small data-i18n="optional">可选</small></label><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help" data-i18n="codeHelp">留空将自动生成安全短码。</p></div>
+        <div class="form-field"><label for="link-url"><span data-i18n="destinationUrl">目标链接</span> <span>*</span></label><input id="link-url" type="url" inputmode="url" placeholder="https://example.com/long-link" required></div>
+        <div class="form-field"><label for="link-title"><span data-i18n="label">备注名称</span> <small data-i18n="optional">可选</small></label><input id="link-title" type="text" maxlength="120" placeholder="例如：夏日活动" data-i18n-placeholder="labelPlaceholder"></div>
+        <div class="form-field" id="code-wrap"><div class="field-heading"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small data-i18n="optional">可选</small></label><span class="field-note" data-i18n="codeFormat">3–64 位</span></div><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help"><span class="help-dot">i</span><span data-i18n="codeHelp">留空将自动生成安全短码。</span></p></div>
         <p class="form-error" id="link-error" role="alert"></p>
         <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog data-i18n="cancel">取消</button><button class="button button-primary" id="save-link" type="submit">新建链接</button></div>
       </form>
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="/admin/app.js?v=20260731-3" defer></script>
+    <script src="/admin/app.js?v=20260731-4" defer></script>
   </body>
 </html>
