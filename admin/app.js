@@ -48,8 +48,20 @@
     catch (error) { if (error.status === 401) return showLogin(); showToast(error.message); state.links = []; renderLinks(); }
     finally { setLoading(false); }
   }
-  function showLogin() { el.dashboard.hidden = true; el.signOut.hidden = true; el.loginView.hidden = false; setTimeout(() => el.password.focus(), 0); }
-  function showDashboard() { el.loginView.hidden = true; el.dashboard.hidden = false; el.signOut.hidden = false; loadLinks(); }
+  function showLogin(message = "") {
+    el.dashboard.hidden = true;
+    el.signOut.hidden = true;
+    el.loginView.hidden = false;
+    if (message) el.loginError.textContent = message;
+    setTimeout(() => el.password.focus(), 0);
+  }
+  function showDashboard() {
+    sessionStorage.removeItem("edgeshort:pending-login");
+    el.loginView.hidden = true;
+    el.dashboard.hidden = false;
+    el.signOut.hidden = false;
+    loadLinks();
+  }
   function openDialog(link = null) {
     state.editing = link;
     el.linkForm.reset(); el.linkError.textContent = ""; el.editingCode.value = link?.code || "";
@@ -67,7 +79,14 @@
   }
   el.loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); el.loginError.textContent = ""; const button = el.loginForm.querySelector("button[type=submit]"); button.disabled = true;
-    try { await request("/api/auth/login", { method: "POST", body: JSON.stringify({ password: el.password.value }) }); el.password.value = ""; showDashboard(); }
+    try {
+      await request("/api/auth/login", { method: "POST", body: JSON.stringify({ password: el.password.value }) });
+      el.password.value = "";
+      sessionStorage.setItem("edgeshort:pending-login", "1");
+      const session = await request("/api/auth/session");
+      if (!session.authenticated) throw new Error("密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。");
+      window.location.replace("/admin/?view=links");
+    }
     catch (error) { el.loginError.textContent = error.message; } finally { button.disabled = false; }
   });
   $("#toggle-password").addEventListener("click", () => { const hidden = el.password.type === "password"; el.password.type = hidden ? "text" : "password"; $("#toggle-password").textContent = hidden ? "Hide" : "Show"; });
@@ -85,5 +104,14 @@
   el.table.addEventListener("click", (event) => { const button = event.target.closest("button"); if (!button) return; if (button.dataset.copy) copy(button.dataset.copy); if (button.dataset.edit) openDialog(state.links.find((link) => link.code === button.dataset.edit)); if (button.dataset.delete) deleteLink(button.dataset.delete); });
   el.search.addEventListener("input", () => { clearTimeout(state.searchTimer); state.searchTimer = setTimeout(loadLinks, 200); });
   document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); el.search.focus(); } });
-  (async () => { try { const data = await request("/api/auth/session"); data.authenticated ? showDashboard() : showLogin(); } catch { showLogin(); } })();
+  (async () => {
+    const pendingLogin = sessionStorage.getItem("edgeshort:pending-login") === "1";
+    try {
+      const data = await request("/api/auth/session");
+      if (data.authenticated) return showDashboard();
+      showLogin(pendingLogin ? "密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。" : "");
+    } catch {
+      showLogin(pendingLogin ? "无法确认登录状态，请刷新页面后重试。" : "");
+    }
+  })();
 })();
