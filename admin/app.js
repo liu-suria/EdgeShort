@@ -4,14 +4,14 @@
       adminConsole: "链接管理", privateAdmin: "私有管理后台", welcomeBack: "欢迎回来", signInDescription: "登录后管理你的短链接。", password: "密码", show: "显示", hide: "隐藏", signIn: "登录", signOut: "退出登录",
       yourLinks: "你的短链接", shortLinksTitle: "所有短链接，尽在一处。", shortLinksDescription: "创建、管理和追踪每一条链接。", storageReady: "存储已就绪", newLink: "新建链接", totalLinks: "链接总数", totalVisits: "访问总数", allLinks: "全部链接", loading: "加载中…", loadingLinks: "正在加载链接", searchLinks: "搜索链接", noLinks: "还没有链接", noLinksDescription: "新建第一条短链接，它会显示在这里。", remark: "备注", destination: "目标地址", visits: "访问", updated: "更新时间", actions: "操作",
       destinationUrl: "目标链接", label: "备注名称", optional: "可选", labelPlaceholder: "例如：夏日活动", customCode: "自定义短码", codeFormat: "1–16 位", codeHelp: "留空将自动生成安全短码。", editCodeHelp: "可修改短码；保存后旧短码将失效。", expiresAt: "过期时间", expiresInDays: "有效天数", expiryDaysPlaceholder: "例如：3", days: "天", neverExpires: "永不过期", expiryHelp: "填写 3 表示保存后 3 天到期；留空表示永不过期。", expires: "过期：{date}", cancel: "取消", editLink: "编辑链接", createShortLink: "新建短链接", editShortLink: "编辑短链接", saveChanges: "保存修改", copy: "复制", edit: "编辑", delete: "删除", copied: "短链接已复制", copyFailed: "复制失败，请手动复制链接", deleteConfirm: "确定删除 /{code} 吗？此操作无法撤销。", deleted: "链接已删除", updatedToast: "链接已更新", created: "链接已创建", linkCount: "{count} 条链接", oneLink: "1 条链接",
-      apiAccess: "API 调用", apiTitle: "API 密钥", apiDescription: "使用 API 在自己的工具或自动化中管理短链接。", apiKeyName: "密钥名称", apiKeyNamePlaceholder: "例如：自动化脚本", generateApiKey: "生成 API Key", apiKeyCreated: "请立即保存此 API Key", apiKeyOnce: "为了安全起见，关闭后将无法再次查看完整密钥。", activeApiKeys: "API Keys", apiKeyCount: "{count} 个密钥", apiKeyNone: "还没有 API Key。生成一个用于 API 调用。", apiKeyLastUsed: "最近使用：{date}", apiKeyNeverUsed: "尚未使用", apiKeyRevoked: "已撤销", revoke: "撤销", revokeApiKeyConfirm: "撤销「{name}」？使用此密钥的 API 调用将立即失效。", apiKeyRevokedToast: "API Key 已撤销", apiKeyCopied: "API Key 已复制", apiExample: "调用示例",
+      apiAccess: "API 调用", apiTitle: "API 密钥", apiDescription: "使用 API 在自己的工具或自动化中管理短链接。", apiKeyName: "密钥名称", apiKeyNamePlaceholder: "例如：自动化脚本", generateApiKey: "生成 API Key", apiKeyCreated: "请立即保存此 API Key", apiKeyOnce: "为了安全起见，关闭后将无法再次查看完整密钥。", activeApiKeys: "API Keys", apiKeyCount: "{count} 个密钥", apiKeyNone: "还没有 API Key。生成一个用于 API 调用。", apiKeyLastUsed: "最近使用：{date}", apiKeyNeverUsed: "尚未使用", apiKeyRevoked: "已撤销", revoke: "撤销", revokeApiKeyConfirm: "撤销「{name}」？使用此密钥的 API 调用将立即失效。", apiKeyRevokedToast: "API Key 已撤销", apiKeyCopied: "API Key 已复制", apiExample: "调用示例", qrCode: "短链二维码", saveQrCode: "保存二维码", qrCodeFailed: "二维码生成失败，请刷新后重试",
       sessionMissing: "密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。", sessionUnknown: "无法确认登录状态，请刷新页面后重试。", invalidUrl: "请输入有效的 http:// 或 https:// 目标链接", serverError: "服务器错误（{status}）。请检查最新的 Edge Function 部署和项目密钥。", requestFailed: "请求失败（{status}）",
     },
     en: {
       adminConsole: "LINK MANAGEMENT", privateAdmin: "PRIVATE ADMIN", welcomeBack: "Welcome back.", signInDescription: "Sign in to manage your short links.", password: "Password", show: "Show", hide: "Hide", signIn: "Sign in", signOut: "Sign out",
       yourLinks: "YOUR LINKS", shortLinksTitle: "Short links, in one place.", shortLinksDescription: "Create, manage, and track every link.", storageReady: "Storage ready", newLink: "New link", totalLinks: "Total links", totalVisits: "Total visits", allLinks: "All links", loading: "Loading…", loadingLinks: "Loading links", searchLinks: "Search links", noLinks: "No links yet", noLinksDescription: "Create your first short link to see it here.", remark: "Remark", destination: "Destination", visits: "Visits", updated: "Updated", actions: "Actions",
       destinationUrl: "Destination URL", label: "Remark", optional: "optional", labelPlaceholder: "e.g. Summer campaign", customCode: "Custom code", codeFormat: "1–16 characters", codeHelp: "Leave empty to generate a secure short code.", editCodeHelp: "You can change the code. The previous short code will stop working.", expiresAt: "Expiration", expiresInDays: "Valid for", expiryDaysPlaceholder: "e.g. 3", days: "days", neverExpires: "Never expires", expiryHelp: "Enter 3 to expire the link three days after saving. Leave blank to never expire.", expires: "Expires: {date}", cancel: "Cancel", editLink: "EDIT LINK", createShortLink: "Create short link", editShortLink: "Edit short link", saveChanges: "Save changes", copy: "Copy", edit: "Edit", delete: "Delete", copied: "Short link copied", copyFailed: "Copy failed — please copy the link manually", deleteConfirm: "Delete /{code}? This cannot be undone.", deleted: "Link deleted", updatedToast: "Link updated", created: "Link created", linkCount: "{count} links", oneLink: "1 link",
-      apiAccess: "API access", apiTitle: "API keys", apiDescription: "Use the API to manage short links from your own tools or automations.", apiKeyName: "Key name", apiKeyNamePlaceholder: "e.g. Automation script", generateApiKey: "Generate API key", apiKeyCreated: "Save this API key now", apiKeyOnce: "For security, the full key cannot be viewed again after this dialog is closed.", activeApiKeys: "API keys", apiKeyCount: "{count} keys", apiKeyNone: "No API keys yet. Generate one for API access.", apiKeyLastUsed: "Last used: {date}", apiKeyNeverUsed: "Never used", apiKeyRevoked: "Revoked", revoke: "Revoke", revokeApiKeyConfirm: "Revoke “{name}”? API calls using this key will stop immediately.", apiKeyRevokedToast: "API key revoked", apiKeyCopied: "API key copied", apiExample: "Example",
+      apiAccess: "API access", apiTitle: "API keys", apiDescription: "Use the API to manage short links from your own tools or automations.", apiKeyName: "Key name", apiKeyNamePlaceholder: "e.g. Automation script", generateApiKey: "Generate API key", apiKeyCreated: "Save this API key now", apiKeyOnce: "For security, the full key cannot be viewed again after this dialog is closed.", activeApiKeys: "API keys", apiKeyCount: "{count} keys", apiKeyNone: "No API keys yet. Generate one for API access.", apiKeyLastUsed: "Last used: {date}", apiKeyNeverUsed: "Never used", apiKeyRevoked: "Revoked", revoke: "Revoke", revokeApiKeyConfirm: "Revoke “{name}”? API calls using this key will stop immediately.", apiKeyRevokedToast: "API key revoked", apiKeyCopied: "API key copied", apiExample: "Example", qrCode: "Short-link QR code", saveQrCode: "Save QR code", qrCodeFailed: "Unable to generate the QR code. Refresh and try again.",
       sessionMissing: "Password accepted, but the browser did not save the session. Allow cookies for this site and try again.", sessionUnknown: "Unable to confirm the sign-in session. Refresh the page and try again.", invalidUrl: "Enter a valid http:// or https:// destination URL", serverError: "Server error ({status}). Check the latest Edge Function deployment and project secrets.", requestFailed: "Request failed ({status})",
     },
   };
@@ -75,7 +75,7 @@
       const expiry = link.expiresAt
         ? `<span class="expiry">${formatExpiryDate(link.expiresAt)}</span>`
         : `<span class="expiry expiry-never">${t("neverExpires")}</span>`;
-      return `<tr><td class="remark-cell" title="${escapeHtml(link.title || "")}">${remark}</td><td class="code-cell"><a class="short-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(short)}">/${escapeHtml(link.code)}</a></td><td><a class="destination" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number">${formatNumber(link.visits)}</td><td>${expiry}</td><td><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-copy="${escapeHtml(link.code)}">${t("copy")}</button><button class="row-action" type="button" data-edit="${escapeHtml(link.code)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.code)}">${t("delete")}</button></div></td></tr>`;
+      return `<tr><td class="remark-cell" title="${escapeHtml(link.title || "")}">${remark}</td><td class="code-cell"><div class="short-code-control"><a class="short-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(short)}">/${escapeHtml(link.code)}</a><div class="qr-control"><button class="qr-trigger" type="button" data-qr="${escapeHtml(link.code)}" aria-label="${escapeHtml(t("qrCode"))}" title="${escapeHtml(t("qrCode"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4Zm2 2v2h2V6H6Zm8-2h6v6h-6V4Zm2 2v2h2V6h-2ZM4 14h6v6H4v-6Zm2 2v2h2v-2H6Zm7-2h2v2h-2v-2Zm3 0h4v2h-2v2h2v2h-4v-2h-2v-2h2v-2Zm-3 4h2v2h-2v-2Z"/></svg></button><div class="qr-popover" role="group" aria-label="${escapeHtml(t("qrCode"))}" hidden><div class="qr-canvas"></div><span class="qr-caption">${escapeHtml(t("qrCode"))}</span><button class="qr-download" type="button" data-download-qr="${escapeHtml(link.code)}">${escapeHtml(t("saveQrCode"))}</button></div></div></div></td><td><a class="destination" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number">${formatNumber(link.visits)}</td><td>${expiry}</td><td><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-copy="${escapeHtml(link.code)}">${t("copy")}</button><button class="row-action" type="button" data-edit="${escapeHtml(link.code)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.code)}">${t("delete")}</button></div></td></tr>`;
     }).join("");
   }
   async function loadLinks() {
@@ -137,6 +137,40 @@
     try { await request(`/api/api-keys/${encodeURIComponent(id)}`, { method: "DELETE" }); await loadApiKeys(); showToast(t("apiKeyRevokedToast")); } catch (error) { showToast(error.message); }
   }
   async function copy(code) { try { await navigator.clipboard.writeText(shortUrl(code)); showToast(t("copied")); } catch { showToast(t("copyFailed")); } }
+  async function renderQr(control) {
+    const holder = control.querySelector(".qr-canvas");
+    if (holder.dataset.ready === "true") return true;
+    if (!window.QRCode) { showToast(t("qrCodeFailed")); return false; }
+    try {
+      new window.QRCode(holder, { text: shortUrl(control.querySelector("[data-qr]").dataset.qr), width: 176, height: 176, colorDark: "#0b1020", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
+      holder.dataset.ready = "true";
+      return true;
+    } catch { showToast(t("qrCodeFailed")); return false; }
+  }
+  async function showQr(control) {
+    const popover = control.querySelector(".qr-popover");
+    popover.hidden = false;
+    await renderQr(control);
+  }
+  async function toggleQr(button) {
+    const control = button.closest(".qr-control");
+    const popover = control.querySelector(".qr-popover");
+    const opening = popover.hidden || control.dataset.pinned !== "true";
+    document.querySelectorAll(".qr-popover").forEach((item) => { if (item !== popover) item.hidden = true; });
+    document.querySelectorAll(".qr-control").forEach((item) => { if (item !== control) delete item.dataset.pinned; });
+    popover.hidden = !opening;
+    if (opening) { control.dataset.pinned = "true"; await renderQr(control); } else delete control.dataset.pinned;
+  }
+  async function downloadQr(button) {
+    const control = button.closest(".qr-control");
+    if (!await renderQr(control)) return;
+    const link = document.createElement("a");
+    const canvas = control.querySelector(".qr-canvas canvas");
+    if (!canvas) { showToast(t("qrCodeFailed")); return; }
+    link.href = canvas.toDataURL("image/png");
+    link.download = `short-link-${button.dataset.downloadQr}.png`;
+    link.click();
+  }
   async function deleteLink(code) {
     const link = state.links.find((item) => item.code === code);
     if (!link || !window.confirm(t("deleteConfirm", { code }))) return;
@@ -183,7 +217,10 @@
   });
   el.copyApiKey.addEventListener("click", async () => { try { await navigator.clipboard.writeText(el.apiKeyValue.value); showToast(t("apiKeyCopied")); } catch { showToast(t("copyFailed")); } });
   el.apiKeysList.addEventListener("click", (event) => { const button = event.target.closest("button[data-revoke-api-key]"); if (button) revokeApiKey(button.dataset.revokeApiKey); });
-  el.table.addEventListener("click", (event) => { const button = event.target.closest("button"); if (!button) return; if (button.dataset.copy) copy(button.dataset.copy); if (button.dataset.edit) openDialog(state.links.find((link) => link.code === button.dataset.edit)); if (button.dataset.delete) deleteLink(button.dataset.delete); });
+  el.table.addEventListener("click", (event) => { const button = event.target.closest("button"); if (!button) return; if (button.dataset.copy) copy(button.dataset.copy); if (button.dataset.edit) openDialog(state.links.find((link) => link.code === button.dataset.edit)); if (button.dataset.delete) deleteLink(button.dataset.delete); if (button.dataset.qr) toggleQr(button); if (button.dataset.downloadQr) downloadQr(button); });
+  el.table.addEventListener("pointerover", (event) => { const button = event.target.closest("[data-qr]"); if (button && event.pointerType !== "touch") showQr(button.closest(".qr-control")); });
+  el.table.addEventListener("pointerout", (event) => { const control = event.target.closest(".qr-control"); if (control && !control.contains(event.relatedTarget) && control.dataset.pinned !== "true") control.querySelector(".qr-popover").hidden = true; });
+  el.table.addEventListener("focusin", (event) => { const button = event.target.closest("[data-qr]"); if (button) showQr(button.closest(".qr-control")); });
   el.search.addEventListener("input", () => { clearTimeout(state.searchTimer); state.searchTimer = setTimeout(loadLinks, 200); });
   el.languageToggle.addEventListener("click", () => { state.language = state.language === "zh" ? "en" : "zh"; localStorage.setItem("edgeshort:language", state.language); applyLanguage(); });
   document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); el.search.focus(); } });

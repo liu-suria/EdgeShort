@@ -90,7 +90,18 @@ tr:first-child td { border-top: 0; }
 tr:hover td { background: rgba(150, 183, 241, .03); }
 .number { text-align: right; }
 .remark-cell { width: 15%; min-width: 130px; max-width: 200px; overflow: hidden; color: #c6d3eb; text-overflow: ellipsis; white-space: nowrap; }
-.code-cell { min-width: 170px; }
+.code-cell { min-width: 196px; }
+.short-code-control { display: inline-flex; align-items: center; gap: 6px; }
+.qr-control { position: relative; display: inline-flex; }
+.qr-trigger { display: inline-grid; width: 26px; height: 26px; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 7px; color: var(--subtle); background: transparent; }
+.qr-trigger svg { width: 16px; height: 16px; fill: currentColor; }
+.qr-trigger:hover, .qr-trigger:focus-visible { border-color: var(--line); color: var(--blue-strong); background: rgba(129,176,255,.09); outline: none; }
+.qr-popover { position: absolute; z-index: 4; top: calc(100% + 9px); left: -14px; display: grid; width: 202px; padding: 13px; place-items: center; border: 1px solid #395073; border-radius: 13px; color: var(--text); background: #10192c; box-shadow: var(--shadow); }
+.qr-popover[hidden] { display: none !important; }
+.qr-canvas, .qr-canvas canvas { display: block; width: 176px; height: 176px; border-radius: 6px; image-rendering: pixelated; background: #fff; }
+.qr-caption { margin: 9px 0 8px; color: var(--muted); font-size: .72rem; }
+.qr-download { width: 100%; min-height: 31px; border: 1px solid var(--line); border-radius: 7px; color: #c3d1e9; background: rgba(255,255,255,.025); font-size: .74rem; font-weight: 680; }
+.qr-download:hover { border-color: #4a6389; color: var(--text); background: rgba(255,255,255,.065); }
 .short-url { display: block; max-width: 170px; overflow: hidden; color: var(--blue-strong); text-overflow: ellipsis; white-space: nowrap; text-decoration: none; font-weight: 700; }
 .short-url:hover, .destination:hover { text-decoration: underline; }
 .expiry { display: inline-block; color: #a6b9d9; font-size: .78rem; line-height: 1.25; white-space: nowrap; }
