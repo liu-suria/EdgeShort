@@ -1,28 +1,217 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <title>EdgeShort</title>
+    <meta name="theme-color" content="#080d1b">
+    <meta name="color-scheme" content="dark">
+    <title>EdgeShort — 简洁的短链接</title>
     <style>
-      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1020; color: #e8edf9; }
+      :root {
+        --ink: #f7f9ff;
+        --muted: #a6b1ca;
+        --line: rgba(185, 205, 255, .16);
+        --blue: #a7c5ff;
+        --blue-2: #718cff;
+        --canvas: #080d1b;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
       * { box-sizing: border-box; }
-      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 20% 20%, #172554 0, transparent 34rem), radial-gradient(circle at 80% 80%, #1e1b4b 0, transparent 30rem), #0b1020; }
-      main { max-width: 560px; text-align: center; }
-      .mark { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; margin: 0 auto 20px; font-weight: 800; font-size: 26px; background: linear-gradient(135deg, #60a5fa, #818cf8); color: #0b1020; box-shadow: 0 18px 60px #0008; }
-      h1 { font-size: clamp(2.2rem, 7vw, 4rem); letter-spacing: -.07em; margin: 0; }
-      p { color: #a6b1cc; line-height: 1.65; margin: 18px 0 28px; }
-      a { display: inline-block; padding: 12px 18px; border-radius: 10px; color: #0b1020; background: #e8edf9; font-weight: 750; text-decoration: none; }
-      a:hover { background: white; }
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        overflow-x: hidden;
+        color: var(--ink);
+        background:
+          radial-gradient(ellipse 70% 55% at 8% -5%, rgba(51, 96, 198, .36), transparent 67%),
+          radial-gradient(ellipse 52% 44% at 96% 99%, rgba(98, 62, 196, .26), transparent 69%),
+          var(--canvas);
+      }
+      body::before, body::after {
+        position: fixed;
+        z-index: -1;
+        width: 35rem;
+        height: 35rem;
+        content: "";
+        pointer-events: none;
+        filter: blur(1px);
+        border-radius: 50%;
+      }
+      body::before { top: 14%; left: -24rem; background: rgba(67, 119, 255, .11); }
+      body::after { right: -22rem; bottom: 0; background: rgba(126, 82, 255, .11); }
+      a { color: inherit; text-decoration: none; }
+      .page { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 96px;
+      }
+      .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 780; letter-spacing: -.045em; }
+      .brand-mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        color: #071125;
+        font-size: 20px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #c5dcff, #8598ff);
+        border-radius: 10px;
+        box-shadow: 0 8px 28px rgba(89, 119, 255, .28);
+      }
+      .brand-name { font-size: 1.12rem; }
+      .admin-link {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        gap: 8px;
+        padding: 0 13px;
+        color: #d5def3;
+        font-size: .83rem;
+        font-weight: 670;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255,255,255,.025);
+        transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      }
+      .admin-link:hover { transform: translateY(-1px); background: rgba(255,255,255,.07); border-color: rgba(185, 205, 255, .3); }
+      .admin-link span { color: var(--blue); font-size: 1rem; }
+      main { padding: clamp(58px, 10vw, 138px) 0 54px; }
+      .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .88fr); align-items: center; gap: clamp(48px, 8vw, 124px); }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 23px;
+        color: #a9c7ff;
+        font-size: .7rem;
+        font-weight: 780;
+        letter-spacing: .14em;
+      }
+      .eyebrow::before { width: 7px; height: 7px; content: ""; background: #84a7ff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(132, 167, 255, .1); }
+      h1 { max-width: 700px; margin: 0; font-size: clamp(3.15rem, 6.65vw, 6.25rem); font-weight: 760; line-height: .98; letter-spacing: -.082em; }
+      h1 em { font-style: normal; color: transparent; background: linear-gradient(100deg, #f4f7ff 12%, #9dc1ff 74%, #9d9cff); -webkit-background-clip: text; background-clip: text; }
+      .intro { max-width: 490px; margin: 27px 0 31px; color: var(--muted); font-size: clamp(1rem, 1.6vw, 1.12rem); line-height: 1.75; }
+      .hero-actions { display: flex; align-items: center; gap: 18px; }
+      .primary-button {
+        display: inline-flex;
+        min-height: 51px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 19px;
+        color: #071120;
+        font-size: .9rem;
+        font-weight: 790;
+        background: linear-gradient(100deg, #d1e1ff, #a9c3ff);
+        border-radius: 12px;
+        box-shadow: 0 16px 40px rgba(97, 131, 255, .19);
+        transition: transform .18s ease, box-shadow .18s ease;
+      }
+      .primary-button:hover { transform: translateY(-2px); box-shadow: 0 20px 47px rgba(97, 131, 255, .29); }
+      .primary-button strong { font-size: 1.12rem; font-weight: 600; }
+      .private-note { color: #8e9ab7; font-size: .78rem; line-height: 1.45; }
+      .private-note b { display: block; color: #bdc9e2; font-size: .72rem; letter-spacing: .08em; }
+      .preview { position: relative; }
+      .preview::before {
+        position: absolute;
+        inset: -34px -34px -34px 12%;
+        z-index: -1;
+        content: "";
+        background: radial-gradient(ellipse, rgba(92, 121, 255, .21), transparent 67%);
+        filter: blur(8px);
+      }
+      .link-card {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(22px, 4vw, 35px);
+        background: linear-gradient(138deg, rgba(29, 42, 75, .84), rgba(14, 21, 42, .79));
+        border: 1px solid rgba(193, 211, 255, .17);
+        border-radius: 23px;
+        box-shadow: 0 32px 90px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .05);
+        backdrop-filter: blur(14px);
+      }
+      .link-card::after { position: absolute; top: 0; right: 7%; width: 42%; height: 1px; content: ""; background: linear-gradient(90deg, transparent, rgba(196,217,255,.62), transparent); }
+      .card-top { display: flex; align-items: center; justify-content: space-between; color: #9aa9c7; font-size: .72rem; font-weight: 700; letter-spacing: .08em; }
+      .live { display: inline-flex; align-items: center; gap: 7px; color: #b9c9e7; }
+      .live i { width: 6px; height: 6px; background: #77d4b0; border-radius: 50%; box-shadow: 0 0 10px #77d4b0; }
+      .short-link { display: flex; align-items: center; justify-content: space-between; gap: 13px; margin: 32px 0 25px; padding: 14px 15px 14px 17px; color: #dce8ff; background: rgba(6, 11, 25, .47); border: 1px solid rgba(180, 202, 255, .13); border-radius: 13px; }
+      .short-link div { min-width: 0; }
+      .short-link small { display: block; margin-bottom: 4px; color: #7383a5; font-size: .65rem; font-weight: 700; letter-spacing: .08em; }
+      .short-link b { display: block; overflow: hidden; font-size: clamp(.98rem, 1.8vw, 1.24rem); letter-spacing: -.04em; text-overflow: ellipsis; white-space: nowrap; }
+      .copy { display: grid; flex: 0 0 auto; width: 34px; height: 34px; place-items: center; color: #c3d6ff; font-size: 1rem; background: rgba(138, 170, 255, .13); border-radius: 9px; }
+      .destination { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 11px; align-items: center; }
+      .destination-icon { display: grid; width: 34px; height: 34px; place-items: center; color: #8faefe; font-size: 1rem; background: rgba(112, 145, 255, .12); border-radius: 10px; }
+      .destination small { display: block; margin-bottom: 3px; color: #7d8eaf; font-size: .65rem; font-weight: 700; letter-spacing: .07em; }
+      .destination b { display: block; overflow: hidden; color: #b9c5dc; font-size: .78rem; font-weight: 570; text-overflow: ellipsis; white-space: nowrap; }
+      .card-footer { display: flex; gap: 9px; margin-top: 27px; padding-top: 19px; border-top: 1px solid rgba(183, 203, 255, .11); }
+      .metric { flex: 1; padding: 0 3px; }
+      .metric + .metric { padding-left: 18px; border-left: 1px solid rgba(183, 203, 255, .11); }
+      .metric span { display: block; color: #7d8cac; font-size: .66rem; }
+      .metric strong { display: block; margin-top: 4px; color: #e5edff; font-size: 1.06rem; letter-spacing: -.04em; }
+      .principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: clamp(72px, 12vw, 148px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .principle { min-height: 142px; padding: 27px 30px; }
+      .principle + .principle { border-left: 1px solid var(--line); }
+      .principle-number { display: block; margin-bottom: 14px; color: #7183ad; font-size: .68rem; font-weight: 740; letter-spacing: .1em; }
+      .principle h2 { margin: 0 0 7px; font-size: 1rem; letter-spacing: -.035em; }
+      .principle p { margin: 0; color: #8f9db8; font-size: .78rem; line-height: 1.55; }
+      footer { display: flex; align-items: center; justify-content: space-between; padding: 26px 0 34px; color: #71809f; font-size: .72rem; }
+      footer span:last-child { color: #98a7c2; }
+      @media (max-width: 760px) {
+        .page { width: min(100% - 32px, 1180px); }
+        .topbar { height: 75px; }
+        main { padding-top: 52px; }
+        .hero { grid-template-columns: 1fr; gap: 54px; }
+        h1 { max-width: 560px; }
+        .preview { max-width: 540px; }
+        .principles { grid-template-columns: 1fr; margin-top: 78px; }
+        .principle { min-height: 0; padding: 23px 2px; }
+        .principle + .principle { border-top: 1px solid var(--line); border-left: 0; }
+      }
+      @media (max-width: 420px) {
+        .admin-link { min-height: 36px; padding: 0 10px; }
+        .admin-link em { display: none; }
+        .hero-actions { align-items: flex-start; flex-direction: column; gap: 14px; }
+        .short-link { margin: 25px 0 21px; }
+        footer { align-items: flex-start; flex-direction: column; gap: 7px; }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <div class="mark">↗</div>
-      <h1>EdgeShort</h1>
-      <p>A private, fast URL shortener running on EdgeOne.</p>
-      <a href="/admin/">Open admin</a>
-    </main>
+    <div class="page">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="EdgeShort 首页"><span class="brand-mark">↗</span><span class="brand-name">EdgeShort</span></a>
+        <a class="admin-link" href="/admin/"><span>↗</span><em>进入管理后台</em></a>
+      </header>
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div>
+            <span class="eyebrow">PRIVATE URL SHORTENER</span>
+            <h1 id="hero-title">让每一个链接，<em>更利落地抵达。</em></h1>
+            <p class="intro">一个只属于你的短链接空间。创建、管理、追踪，所有操作都在你自己的 EdgeOne 边缘网络上完成。</p>
+            <div class="hero-actions">
+              <a class="primary-button" href="/admin/">管理短链接 <strong aria-hidden="true">→</strong></a>
+              <span class="private-note"><b>PRIVATE BY DESIGN</b>仅管理员可管理</span>
+            </div>
+          </div>
+          <div class="preview" aria-label="短链接示例">
+            <div class="link-card">
+              <div class="card-top"><span>LINK PREVIEW</span><span class="live"><i></i> ACTIVE</span></div>
+              <div class="short-link"><div><small>YOUR SHORT LINK</small><b>go.yourdomain.com/hello</b></div><span class="copy" aria-hidden="true">⧉</span></div>
+              <div class="destination"><span class="destination-icon" aria-hidden="true">↗</span><div><small>DESTINATION</small><b>https://example.com/your-destination</b></div></div>
+              <div class="card-footer"><div class="metric"><span>访问次数</span><strong>2,481</strong></div><div class="metric"><span>状态</span><strong>正常</strong></div><div class="metric"><span>更新于</span><strong>刚刚</strong></div></div>
+            </div>
+          </div>
+        </section>
+        <section class="principles" aria-label="产品特点">
+          <article class="principle"><span class="principle-number">01</span><h2>干净的链接</h2><p>自动生成或自定义短码，让分享更直观。</p></article>
+          <article class="principle"><span class="principle-number">02</span><h2>边缘快速跳转</h2><p>请求由 EdgeOne Edge Functions 就近处理。</p></article>
+          <article class="principle"><span class="principle-number">03</span><h2>仅你可管理</h2><p>密码登录后台，链接数据私密保存。</p></article>
+        </section>
+      </main>
+      <footer><span>© 2026 EdgeShort</span><span>Built for your own links.</span></footer>
+    </div>
   </body>
 </html>
