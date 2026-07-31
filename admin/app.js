@@ -15,8 +15,17 @@
   function showToast(message) { el.toast.textContent = message; el.toast.classList.add("show"); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => el.toast.classList.remove("show"), 2600); }
   async function request(path, options = {}) {
     const response = await fetch(path, { credentials: "same-origin", headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) }, ...options });
-    const data = response.status === 204 ? null : await response.json().catch(() => ({}));
-    if (!response.ok) { const error = new Error(data.error || "Something went wrong"); error.status = response.status; throw error; }
+    const text = response.status === 204 ? "" : await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = null; }
+    if (!response.ok) {
+      const fallback = response.status >= 500
+        ? `Server error (${response.status}). Check the latest Edge Function deployment and project secrets.`
+        : `Request failed (${response.status})`;
+      const error = new Error(data?.error || fallback);
+      error.status = response.status;
+      throw error;
+    }
     return data;
   }
   function setLoading(loading) { el.loading.hidden = !loading; if (loading) { el.empty.hidden = true; el.tableWrap.hidden = true; } }
