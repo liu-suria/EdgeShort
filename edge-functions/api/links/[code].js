@@ -1,7 +1,7 @@
 import {
-  getLinkStore, getRecord, json, normaliseTitle, normaliseUrl, publicRecord,
-  readJson, requireAuth, saveRecord,
+  json, normaliseTitle, normaliseUrl, publicRecord, readJson, requireAuth,
 } from "../../../_lib.js";
+import { getLinkStore, getRecord, recordKey, saveRecord } from "../../../_storage.js";
 
 function codeFrom(context) {
   return context.params?.code;
@@ -44,7 +44,7 @@ export async function onRequestDelete(context) {
     const store = getLinkStore();
     const code = codeFrom(context);
     if (!(await getRecord(store, code))) return json({ error: "Link not found" }, 404);
-    await store.delete(`links/${code}.json`);
+    await store.delete(recordKey(code));
     return new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return json({ error: error.message || "Unable to delete link" }, 500);
