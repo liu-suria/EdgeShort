@@ -127,6 +127,9 @@ dialog::backdrop { background: rgba(1,5,15,.76); backdrop-filter: blur(4px); }
 .field-help { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0 0; color: var(--subtle); font-size: .74rem; line-height: 1.4; }
 .clear-expiry { padding: 0; border: 0; color: var(--blue); background: transparent; font-size: .74rem; font-weight: 650; }
 .clear-expiry:hover { color: var(--blue-strong); text-decoration: underline; }
+.expiry-days-field { display: flex; align-items: center; gap: 10px; }
+.expiry-days-field input { width: 144px; }
+.expiry-days-field > span { color: var(--muted); font-size: .83rem; font-weight: 650; }
 .help-dot { display: inline-grid; width: 14px; height: 14px; flex: 0 0 auto; place-items: center; margin-top: 1px; border: 1px solid #3e5274; border-radius: 50%; color: #9eb0d0; font-size: .61rem; font-weight: 800; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 27px; padding-top: 18px; border-top: 1px solid var(--line); }
 .api-dialog-card { max-width: 640px; }

@@ -3,20 +3,20 @@
     zh: {
       adminConsole: "链接管理", privateAdmin: "私有管理后台", welcomeBack: "欢迎回来", signInDescription: "登录后管理你的短链接。", password: "密码", show: "显示", hide: "隐藏", signIn: "登录", signOut: "退出登录",
       yourLinks: "你的短链接", shortLinksTitle: "所有短链接，尽在一处。", shortLinksDescription: "创建、管理和追踪每一条链接。", storageReady: "存储已就绪", newLink: "新建链接", totalLinks: "链接总数", totalVisits: "访问总数", allLinks: "全部链接", loading: "加载中…", loadingLinks: "正在加载链接", searchLinks: "搜索链接", noLinks: "还没有链接", noLinksDescription: "新建第一条短链接，它会显示在这里。", remark: "备注", destination: "目标地址", visits: "访问", updated: "更新时间", actions: "操作",
-      destinationUrl: "目标链接", label: "备注名称", optional: "可选", labelPlaceholder: "例如：夏日活动", customCode: "自定义短码", codeFormat: "1–16 位", codeHelp: "留空将自动生成安全短码。", editCodeHelp: "可修改短码；保存后旧短码将失效。", expiresAt: "过期时间", neverExpires: "永不过期", expiryHelp: "留空表示永不过期；过期后会展示提示页面。", expires: "过期：{date}", cancel: "取消", editLink: "编辑链接", createShortLink: "新建短链接", editShortLink: "编辑短链接", saveChanges: "保存修改", copy: "复制", edit: "编辑", delete: "删除", copied: "短链接已复制", copyFailed: "复制失败，请手动复制链接", deleteConfirm: "确定删除 /{code} 吗？此操作无法撤销。", deleted: "链接已删除", updatedToast: "链接已更新", created: "链接已创建", linkCount: "{count} 条链接", oneLink: "1 条链接",
+      destinationUrl: "目标链接", label: "备注名称", optional: "可选", labelPlaceholder: "例如：夏日活动", customCode: "自定义短码", codeFormat: "1–16 位", codeHelp: "留空将自动生成安全短码。", editCodeHelp: "可修改短码；保存后旧短码将失效。", expiresAt: "过期时间", expiresInDays: "有效天数", expiryDaysPlaceholder: "例如：3", days: "天", neverExpires: "永不过期", expiryHelp: "填写 3 表示保存后 3 天到期；留空表示永不过期。", expires: "过期：{date}", cancel: "取消", editLink: "编辑链接", createShortLink: "新建短链接", editShortLink: "编辑短链接", saveChanges: "保存修改", copy: "复制", edit: "编辑", delete: "删除", copied: "短链接已复制", copyFailed: "复制失败，请手动复制链接", deleteConfirm: "确定删除 /{code} 吗？此操作无法撤销。", deleted: "链接已删除", updatedToast: "链接已更新", created: "链接已创建", linkCount: "{count} 条链接", oneLink: "1 条链接",
       apiAccess: "API 调用", apiTitle: "API 密钥", apiDescription: "使用 API 在自己的工具或自动化中管理短链接。", apiKeyName: "密钥名称", apiKeyNamePlaceholder: "例如：自动化脚本", generateApiKey: "生成 API Key", apiKeyCreated: "请立即保存此 API Key", apiKeyOnce: "为了安全起见，关闭后将无法再次查看完整密钥。", activeApiKeys: "API Keys", apiKeyCount: "{count} 个密钥", apiKeyNone: "还没有 API Key。生成一个用于 API 调用。", apiKeyLastUsed: "最近使用：{date}", apiKeyNeverUsed: "尚未使用", apiKeyRevoked: "已撤销", revoke: "撤销", revokeApiKeyConfirm: "撤销「{name}」？使用此密钥的 API 调用将立即失效。", apiKeyRevokedToast: "API Key 已撤销", apiKeyCopied: "API Key 已复制", apiExample: "调用示例",
       sessionMissing: "密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。", sessionUnknown: "无法确认登录状态，请刷新页面后重试。", invalidUrl: "请输入有效的 http:// 或 https:// 目标链接", serverError: "服务器错误（{status}）。请检查最新的 Edge Function 部署和项目密钥。", requestFailed: "请求失败（{status}）",
     },
     en: {
       adminConsole: "LINK MANAGEMENT", privateAdmin: "PRIVATE ADMIN", welcomeBack: "Welcome back.", signInDescription: "Sign in to manage your short links.", password: "Password", show: "Show", hide: "Hide", signIn: "Sign in", signOut: "Sign out",
       yourLinks: "YOUR LINKS", shortLinksTitle: "Short links, in one place.", shortLinksDescription: "Create, manage, and track every link.", storageReady: "Storage ready", newLink: "New link", totalLinks: "Total links", totalVisits: "Total visits", allLinks: "All links", loading: "Loading…", loadingLinks: "Loading links", searchLinks: "Search links", noLinks: "No links yet", noLinksDescription: "Create your first short link to see it here.", remark: "Remark", destination: "Destination", visits: "Visits", updated: "Updated", actions: "Actions",
-      destinationUrl: "Destination URL", label: "Remark", optional: "optional", labelPlaceholder: "e.g. Summer campaign", customCode: "Custom code", codeFormat: "1–16 characters", codeHelp: "Leave empty to generate a secure short code.", editCodeHelp: "You can change the code. The previous short code will stop working.", expiresAt: "Expiration", neverExpires: "Never expires", expiryHelp: "Leave blank to keep this link active. Expired links show a notice page.", expires: "Expires: {date}", cancel: "Cancel", editLink: "EDIT LINK", createShortLink: "Create short link", editShortLink: "Edit short link", saveChanges: "Save changes", copy: "Copy", edit: "Edit", delete: "Delete", copied: "Short link copied", copyFailed: "Copy failed — please copy the link manually", deleteConfirm: "Delete /{code}? This cannot be undone.", deleted: "Link deleted", updatedToast: "Link updated", created: "Link created", linkCount: "{count} links", oneLink: "1 link",
+      destinationUrl: "Destination URL", label: "Remark", optional: "optional", labelPlaceholder: "e.g. Summer campaign", customCode: "Custom code", codeFormat: "1–16 characters", codeHelp: "Leave empty to generate a secure short code.", editCodeHelp: "You can change the code. The previous short code will stop working.", expiresAt: "Expiration", expiresInDays: "Valid for", expiryDaysPlaceholder: "e.g. 3", days: "days", neverExpires: "Never expires", expiryHelp: "Enter 3 to expire the link three days after saving. Leave blank to never expire.", expires: "Expires: {date}", cancel: "Cancel", editLink: "EDIT LINK", createShortLink: "Create short link", editShortLink: "Edit short link", saveChanges: "Save changes", copy: "Copy", edit: "Edit", delete: "Delete", copied: "Short link copied", copyFailed: "Copy failed — please copy the link manually", deleteConfirm: "Delete /{code}? This cannot be undone.", deleted: "Link deleted", updatedToast: "Link updated", created: "Link created", linkCount: "{count} links", oneLink: "1 link",
       apiAccess: "API access", apiTitle: "API keys", apiDescription: "Use the API to manage short links from your own tools or automations.", apiKeyName: "Key name", apiKeyNamePlaceholder: "e.g. Automation script", generateApiKey: "Generate API key", apiKeyCreated: "Save this API key now", apiKeyOnce: "For security, the full key cannot be viewed again after this dialog is closed.", activeApiKeys: "API keys", apiKeyCount: "{count} keys", apiKeyNone: "No API keys yet. Generate one for API access.", apiKeyLastUsed: "Last used: {date}", apiKeyNeverUsed: "Never used", apiKeyRevoked: "Revoked", revoke: "Revoke", revokeApiKeyConfirm: "Revoke “{name}”? API calls using this key will stop immediately.", apiKeyRevokedToast: "API key revoked", apiKeyCopied: "API key copied", apiExample: "Example",
       sessionMissing: "Password accepted, but the browser did not save the session. Allow cookies for this site and try again.", sessionUnknown: "Unable to confirm the sign-in session. Refresh the page and try again.", invalidUrl: "Enter a valid http:// or https:// destination URL", serverError: "Server error ({status}). Check the latest Edge Function deployment and project secrets.", requestFailed: "Request failed ({status})",
     },
   };
   const savedLanguage = localStorage.getItem("edgeshort:language");
-  const state = { links: [], apiKeys: [], editing: null, searchTimer: null, language: savedLanguage === "en" ? "en" : "zh" };
+  const state = { links: [], apiKeys: [], editing: null, expiryDirty: false, searchTimer: null, language: savedLanguage === "en" ? "en" : "zh" };
   const $ = (selector) => document.querySelector(selector);
   const el = {
     loginView: $("#login-view"), dashboard: $("#dashboard"), loginForm: $("#login-form"), password: $("#password"), loginError: $("#login-error"), signOut: $("#sign-out"),
@@ -42,8 +42,9 @@
   function shortUrl(code) { return `${origin()}/${code}`; }
   function formatNumber(value) { return new Intl.NumberFormat(state.language === "zh" ? "zh-CN" : "en-US").format(Number(value) || 0); }
   function formatDate(value) { try { return new Intl.DateTimeFormat(state.language === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)); } catch { return "—"; } }
+  function formatExpiryDate(value) { try { return new Intl.DateTimeFormat(state.language === "zh" ? "zh-CN" : "en-US", state.language === "zh" ? { year: "numeric", month: "long", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)); } catch { return "—"; } }
   function formatDateTime(value) { try { return new Intl.DateTimeFormat(state.language === "zh" ? "zh-CN" : "en-US", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch { return "—"; } }
-  function toDateTimeLocal(value) { if (!value) return ""; const date = new Date(value); if (Number.isNaN(date.getTime())) return ""; const offset = date.getTimezoneOffset() * 60_000; return new Date(date.getTime() - offset).toISOString().slice(0, 16); }
+  function remainingDays(value) { const expiresAt = Date.parse(value); if (!Number.isFinite(expiresAt)) return ""; return String(Math.max(1, Math.ceil((expiresAt - Date.now()) / 86_400_000))); }
   function showToast(message) { el.toast.textContent = message; el.toast.classList.add("show"); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => el.toast.classList.remove("show"), 2600); }
   async function request(path, options = {}) {
     const response = await fetch(path, { credentials: "include", cache: "no-store", headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) }, ...options });
@@ -72,7 +73,7 @@
       const short = shortUrl(link.code);
       const remark = link.title ? escapeHtml(link.title) : "—";
       const expiry = link.expiresAt
-        ? `<span class="expiry">${formatDateTime(link.expiresAt)}</span>`
+        ? `<span class="expiry">${formatExpiryDate(link.expiresAt)}</span>`
         : `<span class="expiry expiry-never">${t("neverExpires")}</span>`;
       return `<tr><td class="remark-cell" title="${escapeHtml(link.title || "")}">${remark}</td><td class="code-cell"><a class="short-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(short)}">/${escapeHtml(link.code)}</a></td><td><a class="destination" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number">${formatNumber(link.visits)}</td><td>${expiry}</td><td><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-copy="${escapeHtml(link.code)}">${t("copy")}</button><button class="row-action" type="button" data-edit="${escapeHtml(link.code)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.code)}">${t("delete")}</button></div></td></tr>`;
     }).join("");
@@ -100,11 +101,11 @@
     loadLinks();
   }
   function openDialog(link = null) {
-    state.editing = link;
+    state.editing = link; state.expiryDirty = false;
     el.linkForm.reset(); el.linkError.textContent = ""; el.editingCode.value = link?.code || "";
     el.dialogEyebrow.textContent = link ? t("editLink") : t("newLink"); el.dialogTitle.textContent = link ? t("editShortLink") : t("createShortLink"); el.save.textContent = link ? t("saveChanges") : t("newLink");
     el.codePrefix.textContent = origin(); el.code.value = link?.code || ""; el.code.required = Boolean(link); el.codeOptional.hidden = Boolean(link); el.codeHelp.textContent = link ? t("editCodeHelp") : t("codeHelp");
-    if (link) { el.url.value = link.url; el.title.value = link.title || ""; el.expiresAt.value = toDateTimeLocal(link.expiresAt); }
+    if (link) { el.url.value = link.url; el.title.value = link.title || ""; el.expiresAt.value = remainingDays(link.expiresAt); }
     el.dialog.showModal(); setTimeout(() => el.url.focus(), 0);
   }
   function closeDialog() { el.dialog.close(); }
@@ -162,10 +163,13 @@
   el.apiSettings.addEventListener("click", openApiDialog);
   document.querySelectorAll("[data-close-dialog]").forEach((button) => button.addEventListener("click", closeDialog));
   document.querySelectorAll("[data-close-api-dialog]").forEach((button) => button.addEventListener("click", () => el.apiDialog.close()));
-  el.clearExpiry.addEventListener("click", () => { el.expiresAt.value = ""; });
+  el.clearExpiry.addEventListener("click", () => { state.expiryDirty = true; el.expiresAt.value = ""; });
+  el.expiresAt.addEventListener("input", () => { state.expiryDirty = true; });
   el.linkForm.addEventListener("submit", async (event) => {
     event.preventDefault(); el.linkError.textContent = ""; el.save.disabled = true;
-    const body = { url: el.url.value, title: el.title.value, code: el.code.value.trim(), expiresAt: el.expiresAt.value ? new Date(el.expiresAt.value).toISOString() : "" };
+    const expiryDays = el.expiresAt.value.trim();
+    const expiresAt = state.editing && !state.expiryDirty ? (state.editing.expiresAt || "") : (expiryDays ? Number(expiryDays) : "");
+    const body = { url: el.url.value, title: el.title.value, code: el.code.value.trim(), expiresAt };
     const path = state.editing ? `/api/links/${encodeURIComponent(state.editing.code)}` : "/api/links";
     try { const data = await request(path, { method: state.editing ? "PATCH" : "POST", body: JSON.stringify(body) }); closeDialog(); showToast(state.editing ? t("updatedToast") : t("created")); loadLinks(); if (!state.editing) copy(data.link.code); }
     catch (error) { el.linkError.textContent = error.message; } finally { el.save.disabled = false; }

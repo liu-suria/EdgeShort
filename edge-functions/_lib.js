@@ -139,9 +139,9 @@ export function normaliseTitle(input) {
   return String(input).trim().slice(0, 120);
 }
 
-// An empty value deliberately means "never expires". The admin supplies an ISO
-// date string; API clients can instead supply a whole number of days (for
-// example, `3` means the link expires three days after this request).
+// An empty value deliberately means "never expires". The admin and API can
+// supply a whole number of days (for example, `3` means the link expires three
+// days after this request); ISO date strings remain supported by the API.
 // Invalid or past values are kept distinct so API handlers can return a useful
 // validation error.
 export function normaliseExpiry(input) {

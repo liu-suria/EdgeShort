@@ -56,7 +56,7 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. For API calls, pass `expiresAt` as a whole number of days (for example, `3` expires in three days); ISO date/time strings remain supported for compatibility with the admin. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
+`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. Pass `expiresAt` as a whole number of days (for example, `3` expires in three days). The admin uses the same day-based setting and displays the resulting date as `2026年7月31日`; ISO date/time strings remain supported by the API for compatibility. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
 
 ## Project layout
 
