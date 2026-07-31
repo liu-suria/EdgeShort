@@ -1,49 +1,47 @@
-# Edge Short
+# EdgeShort
 
-一个部署在 EdgeOne Makers 的私人短链接服务：独立后台、密码登录、短链增删改查、复制链接和访问次数统计。
+A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and a bound KV namespace—no framework, database, or client-side secrets.
 
-## 功能
+## Included
 
-- 根路径短链：`https://你的域名/Ab3xYz`
-- 独立后台：`/admin/`
-- 密码登录，密码只保存在 EdgeOne Secret
-- 自动或自定义短码
-- 标题、原链接编辑
-- 累计访问统计
-- 无第三方数据库、无前端框架、无构建依赖
+- `/:code` redirects to the destination with a best-effort visit count.
+- `/admin` is a responsive password-protected control panel.
+- Create auto-generated or custom codes; edit, delete, search, and copy short links.
+- Signed, `HttpOnly`, `Secure`, `SameSite=Strict` session cookie with seven-day expiry.
+- Input validation for URLs and codes, security response headers, no third-party dependencies, and no build command.
 
-## EdgeOne Makers 配置
+## Deploy to EdgeOne Makers
 
-### 1. 创建项目
+1. Import this repository as a Makers project. It is a plain static project: leave the build command empty and use the repository root as the output directory.
+2. In **Storage → KV**, enable KV and create a namespace, for example `edge-short`.
+3. Bind that namespace to this project with the exact runtime variable name **`URLS_KV`**.
+4. Add these encrypted environment variables in the Makers project settings:
 
-从 GitHub 导入本仓库。项目为纯静态文件 + `edge-functions`，通常无需填写构建命令；输出目录使用仓库根目录。
+   | Name | Type | Value |
+   | --- | --- | --- |
+   | `ADMIN_PASSWORD` | Secret | A unique password for `/admin` |
+   | `SESSION_SECRET` | Secret | At least 32 random characters used to sign sessions |
 
-### 2. 开通并绑定 KV
+   Generate a suitable session secret with `openssl rand -hex 32`.
+5. Deploy. Open `/admin` (the trailing slash is added automatically), sign in, and create a link.
 
-1. 在 Makers 控制台开通 KV Storage。
-2. 创建命名空间，例如 `edge-short`。
-3. 将该命名空间绑定到项目，变量名必须填写：`SHORT_KV`。
+For a custom domain, bind the domain in Makers before sharing short links. The admin copies links using the current domain automatically.
 
-### 3. 配置环境变量 / Secret
+## Project layout
 
-| 名称 | 类型 | 说明 |
-|---|---|---|
-| `ADMIN_PASSWORD` | Secret | 后台登录密码 |
-| `SESSION_SECRET` | Secret | 用于签名登录 Cookie，建议至少 32 位随机字符串 |
-
-随机 Secret 可在本地执行：
-
-```bash
-openssl rand -hex 32
+```text
+admin/                    # Plain HTML, CSS, and browser JavaScript
+edge-functions/
+  [code].js               # Public redirect
+  api/auth/*              # Password login and session endpoints
+  api/links/*             # Authenticated CRUD API
+  _lib.js                 # Validation, cookie signing, and KV helpers
+edgeone.json              # /admin redirect and security headers
 ```
 
-### 4. 部署
+## Operational notes
 
-保存配置后重新部署。访问 `/admin/` 登录并创建第一条短链。
-
-## 注意事项
-
-- KV 是最终一致存储，其他边缘节点最多可能在约 60 秒内读到旧值。
-- 当前访问次数采用轻量计数方式；个人低并发使用足够，高并发下可能出现少量计数覆盖。
-- 删除短链后，少数边缘节点可能短时间仍能访问旧缓存。
-- 请勿把 `ADMIN_PASSWORD` 或 `SESSION_SECRET` 写入 GitHub 仓库。
+- EdgeOne KV is eventually consistent. A change can take up to roughly 60 seconds to be visible at a different edge location.
+- KV does not provide atomic increments, so the visit counter is intentionally best-effort. It is ideal for personal/low-concurrency use, but simultaneous requests can occasionally coalesce into one count.
+- Redirects return `302`, so changing a destination takes effect without a browser permanently caching the old target.
+- Never commit real values for `ADMIN_PASSWORD` or `SESSION_SECRET`. `.env.example` is documentation only; configure the actual values in Makers.

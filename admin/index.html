@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0b1020">
+    <title>EdgeShort — Admin</title>
+    <link rel="stylesheet" href="/admin/style.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="EdgeShort home"><span class="brand-mark">↗</span><span>EdgeShort</span></a>
+        <button class="button button-quiet" id="sign-out" type="button" hidden>Sign out</button>
+      </header>
+
+      <main>
+        <section class="login-view" id="login-view" aria-labelledby="login-heading" hidden>
+          <div class="login-card">
+            <span class="eyebrow">PRIVATE ADMIN</span>
+            <h1 id="login-heading">Welcome back.</h1>
+            <p>Sign in to manage your short links.</p>
+            <form id="login-form">
+              <label for="password">Password</label>
+              <div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" required autofocus><button type="button" class="text-button" id="toggle-password">Show</button></div>
+              <p class="form-error" id="login-error" role="alert"></p>
+              <button class="button button-primary button-full" type="submit">Sign in <span aria-hidden="true">→</span></button>
+            </form>
+          </div>
+        </section>
+
+        <section class="dashboard" id="dashboard" hidden>
+          <div class="page-intro">
+            <div><span class="eyebrow">YOUR LINKS</span><h1>Short links, in one place.</h1><p>Make a clean link and keep an eye on where it goes.</p></div>
+            <button class="button button-primary" id="new-link" type="button"><span aria-hidden="true">＋</span> New link</button>
+          </div>
+
+          <section class="stats" aria-label="Link statistics">
+            <div class="stat-card"><span>Total links</span><strong id="total-links">0</strong></div>
+            <div class="stat-card"><span>Total visits</span><strong id="total-visits">0</strong></div>
+          </section>
+
+          <section class="links-panel" aria-labelledby="links-heading">
+            <div class="panel-header"><div><h2 id="links-heading">All links</h2><p id="links-summary">Loading…</p></div><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search links" autocomplete="off"><kbd>⌘ K</kbd></label></div>
+            <div class="loading-state" id="loading-state"><span class="spinner" aria-hidden="true"></span> Loading links</div>
+            <div class="empty-state" id="empty-state" hidden><div class="empty-icon">↗</div><h3>No links yet</h3><p>Create your first short link to see it here.</p><button class="button button-primary" type="button" data-new-link>New link</button></div>
+            <div class="table-wrap" id="table-wrap" hidden>
+              <table><thead><tr><th>Short link</th><th>Destination</th><th class="number">Visits</th><th>Updated</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="links-table"></tbody></table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="link-dialog" aria-labelledby="dialog-title">
+      <form class="dialog-card" id="link-form" method="dialog">
+        <div class="dialog-header"><div><span class="eyebrow" id="dialog-eyebrow">NEW LINK</span><h2 id="dialog-title">Create short link</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Close">×</button></div>
+        <input type="hidden" id="editing-code">
+        <label for="link-url">Destination URL <span>*</span></label><input id="link-url" type="url" inputmode="url" placeholder="https://example.com/long-link" required>
+        <label for="link-title">Label <small>optional</small></label><input id="link-title" type="text" maxlength="120" placeholder="e.g. Summer campaign">
+        <div id="code-wrap"><label for="link-code">Custom code <small>optional</small></label><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help">Leave empty to generate a secure short code.</p></div>
+        <p class="form-error" id="link-error" role="alert"></p>
+        <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog>Cancel</button><button class="button button-primary" id="save-link" type="submit">Create link</button></div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/admin/app.js" defer></script>
+  </body>
+</html>

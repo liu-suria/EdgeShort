@@ -1,0 +1,6 @@
+.DS_Store
+.edgeone/
+.env
+.env.*
+!.env.example
+
