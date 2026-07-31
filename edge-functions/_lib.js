@@ -139,11 +139,22 @@ export function normaliseTitle(input) {
   return String(input).trim().slice(0, 120);
 }
 
+// An empty value deliberately means "never expires". Invalid or past values
+// are kept distinct so API handlers can return a useful validation error.
+export function normaliseExpiry(input) {
+  if (input === undefined || input === null || String(input).trim() === "") return null;
+  if (typeof input !== "string" || input.length > 80) return undefined;
+  const time = Date.parse(input);
+  if (!Number.isFinite(time) || time <= Date.now()) return undefined;
+  return new Date(time).toISOString();
+}
+
 export function publicRecord(record) {
   return {
     code: record.code,
     url: record.url,
     title: record.title || "",
+    expiresAt: record.expiresAt || null,
     visits: Number(record.visits) || 0,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,

@@ -1,5 +1,5 @@
 import {
-  json, makeCode, makeRecordId, normaliseCode, normaliseTitle, normaliseUrl,
+  json, makeCode, makeRecordId, normaliseCode, normaliseExpiry, normaliseTitle, normaliseUrl,
   publicRecord, readJson, requireAuth,
 } from "../../_lib.js";
 import { getLinkStore, listRecords, saveNewRecord } from "../../_storage.js";
@@ -24,13 +24,15 @@ export async function onRequestPost(context) {
     const body = await readJson(context.request);
     const url = normaliseUrl(body.url);
     if (!url) return json({ error: "Enter a valid http:// or https:// destination URL" }, 422);
+    const expiresAt = normaliseExpiry(body.expiresAt);
+    if (expiresAt === undefined) return json({ error: "Expiration time must be a valid future date and time" }, 422);
     const store = getLinkStore();
     let code = body.code ? normaliseCode(body.code) : null;
     if (body.code && !code) return json({ error: "Short code must be 3–64 letters, numbers, hyphens, or underscores, and cannot be reserved" }, 422);
     const now = new Date().toISOString();
     const createLink = (shortCode) => ({
       id: makeRecordId(), code: shortCode, url, title: normaliseTitle(body.title),
-      visits: 0, createdAt: now, updatedAt: now,
+      visits: 0, expiresAt, createdAt: now, updatedAt: now,
     });
     if (code) {
       const link = createLink(code);

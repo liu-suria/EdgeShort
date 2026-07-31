@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0b1020">
     <title>EdgeShort — 管理后台</title>
-    <link rel="stylesheet" href="/admin/style.css?v=20260731-4">
+    <link rel="stylesheet" href="/admin/style.css?v=20260731-5">
   </head>
   <body>
     <div class="app-shell">
@@ -48,7 +48,7 @@
             <div class="loading-state" id="loading-state"><span class="spinner" aria-hidden="true"></span> <span data-i18n="loadingLinks">正在加载链接</span></div>
             <div class="empty-state" id="empty-state" hidden><div class="empty-icon">↗</div><h3 data-i18n="noLinks">还没有链接</h3><p data-i18n="noLinksDescription">新建第一条短链接，它会显示在这里。</p><button class="button button-primary" type="button" data-new-link data-i18n="newLink">新建链接</button></div>
             <div class="table-wrap" id="table-wrap" hidden>
-              <table><thead><tr><th data-i18n="shortLink">短链接</th><th data-i18n="destination">目标地址</th><th class="number" data-i18n="visits">访问</th><th data-i18n="updated">更新时间</th><th><span class="sr-only" data-i18n="actions">操作</span></th></tr></thead><tbody id="links-table"></tbody></table>
+              <table><thead><tr><th data-i18n="remark">备注</th><th data-i18n="customCode">自定义短码</th><th data-i18n="destination">目标地址</th><th class="number" data-i18n="visits">访问</th><th data-i18n="updated">更新时间</th><th><span class="sr-only" data-i18n="actions">操作</span></th></tr></thead><tbody id="links-table"></tbody></table>
             </div>
           </section>
         </section>
@@ -61,13 +61,14 @@
         <input type="hidden" id="editing-code">
         <div class="form-field"><label for="link-url"><span data-i18n="destinationUrl">目标链接</span> <span>*</span></label><input id="link-url" type="url" inputmode="url" placeholder="https://example.com/long-link" required></div>
         <div class="form-field"><label for="link-title"><span data-i18n="label">备注名称</span> <small data-i18n="optional">可选</small></label><input id="link-title" type="text" maxlength="120" placeholder="例如：夏日活动" data-i18n-placeholder="labelPlaceholder"></div>
-        <div class="form-field" id="code-wrap"><div class="field-heading"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small data-i18n="optional">可选</small></label><span class="field-note" data-i18n="codeFormat">3–64 位</span></div><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help"><span class="help-dot">i</span><span data-i18n="codeHelp">留空将自动生成安全短码。</span></p></div>
+        <div class="form-field" id="code-wrap"><div class="field-heading"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small id="code-optional" data-i18n="optional">可选</small></label><span class="field-note" data-i18n="codeFormat">3–64 位</span></div><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help"><span class="help-dot">i</span><span id="code-help" data-i18n="codeHelp">留空将自动生成安全短码。</span></p></div>
+        <div class="form-field"><div class="field-heading"><label for="link-expires-at"><span data-i18n="expiresAt">过期时间</span> <small data-i18n="optional">可选</small></label><button class="clear-expiry" id="clear-expiry" type="button" data-i18n="neverExpires">永不过期</button></div><input id="link-expires-at" type="datetime-local"><p class="field-help"><span class="help-dot">i</span><span data-i18n="expiryHelp">留空表示永不过期；过期后会展示提示页面。</span></p></div>
         <p class="form-error" id="link-error" role="alert"></p>
         <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog data-i18n="cancel">取消</button><button class="button button-primary" id="save-link" type="submit">新建链接</button></div>
       </form>
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="/admin/app.js?v=20260731-4" defer></script>
+    <script src="/admin/app.js?v=20260731-5" defer></script>
   </body>
 </html>

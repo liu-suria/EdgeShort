@@ -6,7 +6,8 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 - `/:code` redirects to the destination with a best-effort visit count.
 - `/admin` is a responsive password-protected control panel.
-- Create auto-generated or custom codes; edit, delete, search, and copy short links.
+- Create auto-generated or custom codes; edit a code, remark, destination, or expiration; delete, search, and copy short links.
+- Branded public error pages for missing, expired, and temporarily unavailable short links.
 - Signed, `HttpOnly`, `Secure`, `SameSite=Strict` session cookie with seven-day expiry.
 - Input validation for URLs and codes, security response headers, no third-party dependencies, and no build command.
 
