@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0b1020">
     <title>EdgeShort — 管理后台</title>
-    <link rel="stylesheet" href="/admin/style.css?v=20260731-5">
+    <link rel="stylesheet" href="/admin/style.css?v=20260731-6">
   </head>
   <body>
     <div class="app-shell">
@@ -34,6 +34,7 @@
           <div class="page-intro">
             <div><span class="eyebrow" data-i18n="yourLinks">你的短链接</span><h1 data-i18n="shortLinksTitle">所有短链接，尽在一处。</h1><p data-i18n="shortLinksDescription">创建、管理和追踪每一条链接。</p></div>
             <div class="intro-side"><span class="sync-status"><i></i><span data-i18n="storageReady">存储已就绪</span></span>
+            <button class="button button-quiet" id="api-settings" type="button"><span aria-hidden="true">⌘</span> <span data-i18n="apiAccess">API 调用</span></button>
             <button class="button button-primary" id="new-link" type="button"><span aria-hidden="true">＋</span> <span data-i18n="newLink">新建链接</span></button>
             </div>
           </div>
@@ -61,14 +62,24 @@
         <input type="hidden" id="editing-code">
         <div class="form-field"><label for="link-url"><span data-i18n="destinationUrl">目标链接</span> <span>*</span></label><input id="link-url" type="url" inputmode="url" placeholder="https://example.com/long-link" required></div>
         <div class="form-field"><label for="link-title"><span data-i18n="label">备注名称</span> <small data-i18n="optional">可选</small></label><input id="link-title" type="text" maxlength="120" placeholder="例如：夏日活动" data-i18n-placeholder="labelPlaceholder"></div>
-        <div class="form-field" id="code-wrap"><div class="field-heading"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small id="code-optional" data-i18n="optional">可选</small></label><span class="field-note" data-i18n="codeFormat">3–64 位</span></div><div class="code-field"><span id="code-prefix"></span><input id="link-code" type="text" maxlength="64" pattern="[A-Za-z0-9_-]{3,64}" placeholder="my-link" autocomplete="off"></div><p class="field-help"><span class="help-dot">i</span><span id="code-help" data-i18n="codeHelp">留空将自动生成安全短码。</span></p></div>
+        <div class="form-field" id="code-wrap"><div class="field-heading"><label for="link-code"><span data-i18n="customCode">自定义短码</span> <small id="code-optional" data-i18n="optional">可选</small></label><span class="field-note" data-i18n="codeFormat">1–16 位</span></div><div class="code-field"><span class="code-prefix" id="code-prefix"></span><span class="code-slash" aria-hidden="true">/</span><input id="link-code" type="text" maxlength="16" pattern="[A-Za-z0-9_-]{1,16}" placeholder="my-link" autocomplete="off"></div><p class="field-help"><span class="help-dot">i</span><span id="code-help" data-i18n="codeHelp">留空将自动生成安全短码。</span></p></div>
         <div class="form-field"><div class="field-heading"><label for="link-expires-at"><span data-i18n="expiresAt">过期时间</span> <small data-i18n="optional">可选</small></label><button class="clear-expiry" id="clear-expiry" type="button" data-i18n="neverExpires">永不过期</button></div><input id="link-expires-at" type="datetime-local"><p class="field-help"><span class="help-dot">i</span><span data-i18n="expiryHelp">留空表示永不过期；过期后会展示提示页面。</span></p></div>
         <p class="form-error" id="link-error" role="alert"></p>
         <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog data-i18n="cancel">取消</button><button class="button button-primary" id="save-link" type="submit">新建链接</button></div>
       </form>
     </dialog>
 
+    <dialog id="api-dialog" aria-labelledby="api-dialog-title">
+      <div class="dialog-card api-dialog-card">
+        <div class="dialog-header"><div><span class="eyebrow" data-i18n="apiAccess">API 调用</span><h2 id="api-dialog-title" data-i18n="apiTitle">API 密钥</h2></div><button type="button" class="icon-button" data-close-api-dialog aria-label="关闭">×</button></div>
+        <section class="api-guide"><p data-i18n="apiDescription">使用 API 在自己的工具或自动化中管理短链接。</p><div class="api-endpoint"><span>GET</span><code id="api-base-url"></code></div><pre id="api-example"></pre></section>
+        <form id="api-key-form" class="api-key-form"><label for="api-key-name" data-i18n="apiKeyName">密钥名称</label><div class="api-create-row"><input id="api-key-name" type="text" maxlength="48" data-i18n-placeholder="apiKeyNamePlaceholder" placeholder="例如：自动化脚本"><button class="button button-primary" id="generate-api-key" type="submit" data-i18n="generateApiKey">生成 API Key</button></div></form>
+        <section class="api-key-result" id="api-key-result" hidden><div><strong data-i18n="apiKeyCreated">请立即保存此 API Key</strong><p data-i18n="apiKeyOnce">为了安全起见，关闭后将无法再次查看完整密钥。</p></div><div class="api-key-value"><input id="api-key-value" type="text" readonly><button class="button button-quiet" id="copy-api-key" type="button" data-i18n="copy">复制</button></div></section>
+        <section class="api-key-list-section"><div class="field-heading"><h3 data-i18n="activeApiKeys">API Keys</h3><span class="field-note" id="api-keys-summary"></span></div><div class="api-key-list" id="api-key-list"></div></section>
+      </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="/admin/app.js?v=20260731-5" defer></script>
+    <script src="/admin/app.js?v=20260731-6" defer></script>
   </body>
 </html>

@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
     if (expiresAt === undefined) return json({ error: "Expiration time must be a valid future date and time" }, 422);
     const store = getLinkStore();
     let code = body.code ? normaliseCode(body.code) : null;
-    if (body.code && !code) return json({ error: "Short code must be 3–64 letters, numbers, hyphens, or underscores, and cannot be reserved" }, 422);
+    if (body.code && !code) return json({ error: "Short code must be 1–16 letters, numbers, hyphens, or underscores, and cannot be reserved" }, 422);
     const now = new Date().toISOString();
     const createLink = (shortCode) => ({
       id: makeRecordId(), code: shortCode, url, title: normaliseTitle(body.title),

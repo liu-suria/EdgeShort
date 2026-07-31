@@ -6,7 +6,8 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 - `/:code` redirects to the destination with a best-effort visit count.
 - `/admin` is a responsive password-protected control panel.
-- Create auto-generated or custom codes; edit a code, remark, destination, or expiration; delete, search, and copy short links.
+- Create auto-generated or custom 1–16 character codes; edit a code, remark, destination, or expiration; delete, search, and copy short links.
+- Generate and revoke API Keys from the admin, with a CORS-enabled API for automation and integrations.
 - Branded public error pages for missing, expired, and temporarily unavailable short links.
 - Signed, `HttpOnly`, `Secure`, `SameSite=Strict` session cookie with seven-day expiry.
 - Input validation for URLs and codes, security response headers, no third-party dependencies, and no build command.
@@ -25,6 +26,36 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 3. Deploy. Open `/admin` (the trailing slash is added automatically), sign in, and create a link. On the first request, Makers automatically creates the private `edgeshort-links` Blob namespace for this project.
 
 For a custom domain, bind the domain in Makers before sharing short links. The admin copies links using the current domain automatically.
+
+## API
+
+Open **API 调用** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
+
+Use the key in `Authorization: Bearer ...` (or `X-API-Key`). The API returns JSON and permits browser calls with CORS enabled.
+
+```bash
+# List links
+curl https://your-domain.com/api/v1/links \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Create a link; code, title, and expiresAt are optional
+curl -X POST https://your-domain.com/api/v1/links \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/campaign","code":"summer-26","title":"Summer campaign","expiresAt":"2026-12-31T16:00:00.000Z"}'
+
+# Read, update, or delete one link
+curl https://your-domain.com/api/v1/links/summer-26 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+curl -X PATCH https://your-domain.com/api/v1/links/summer-26 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/new-destination","title":"Updated campaign"}'
+curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
 
 ## Project layout
 

@@ -3,7 +3,7 @@ const encoder = new TextEncoder();
 // The __Host- prefix prevents a subdomain from setting a competing session cookie.
 export const COOKIE_NAME = "__Host-edgeshort_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
-const CODE_PATTERN = /^[A-Za-z0-9_-]{3,64}$/;
+const CODE_PATTERN = /^[A-Za-z0-9_-]{1,16}$/;
 const RESERVED_CODES = new Set([
   "admin", "api", "favicon", "faviconico", "robots", "sitemap", "assets",
   "edge-functions", "cloud-functions", "index", "login", "logout",
@@ -43,7 +43,7 @@ export function parseCookies(request) {
   }, {});
 }
 
-function toBase64Url(bytes) {
+export function toBase64Url(bytes) {
   let binary = "";
   const array = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   for (let index = 0; index < array.length; index += 1) binary += String.fromCharCode(array[index]);
@@ -61,7 +61,7 @@ async function hmac(value, secret) {
   return toBase64Url(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));
 }
 
-function sameText(left, right) {
+export function timingSafeEqual(left, right) {
   if (typeof left !== "string" || typeof right !== "string") return false;
   let mismatch = left.length ^ right.length;
   const length = Math.max(left.length, right.length);
@@ -71,12 +71,12 @@ function sameText(left, right) {
   return mismatch === 0;
 }
 
-async function sha256(value) {
+export async function hashSecret(value) {
   return toBase64Url(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
 }
 
 export async function passwordMatches(supplied, expected) {
-  return sameText(await sha256(supplied), await sha256(expected));
+  return timingSafeEqual(await hashSecret(supplied), await hashSecret(expected));
 }
 
 export async function createSession(sessionSecret) {
@@ -94,7 +94,7 @@ export async function isAuthenticated(request, sessionSecret) {
   const issuedAt = Number(parts[0]);
   const now = Math.floor(Date.now() / 1000);
   if (issuedAt > now + 60 || now - issuedAt > SESSION_MAX_AGE) return false;
-  return sameText(parts[2], await hmac(`${parts[0]}.${parts[1]}`, sessionSecret));
+  return timingSafeEqual(parts[2], await hmac(`${parts[0]}.${parts[1]}`, sessionSecret));
 }
 
 export function sessionCookie(value) {
@@ -171,6 +171,15 @@ export function makeCode() {
 
 export function makeRecordId() {
   return toBase64Url(crypto.getRandomValues(new Uint8Array(18)));
+}
+
+export function makeApiKey() {
+  return `esk_${toBase64Url(crypto.getRandomValues(new Uint8Array(32)))}`;
+}
+
+export function normaliseApiKeyName(input) {
+  const name = String(input || "").trim().slice(0, 48);
+  return name || "Default API key";
 }
 
 export async function readJson(request) {
