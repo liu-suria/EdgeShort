@@ -1,7 +1,4 @@
-import { getStore } from "@edgeone/pages-blob";
-
 const encoder = new TextEncoder();
-const STORE_NAME = "edgeshort-links";
 
 // The __Host- prefix prevents a subdomain from setting a competing session cookie.
 export const COOKIE_NAME = "__Host-edgeshort_session";
@@ -25,12 +22,6 @@ export function json(data, status = 200, headers = {}) {
 
 export function methodNotAllowed() {
   return json({ error: "Method not allowed" }, 405, { Allow: "GET, POST, PATCH, DELETE" });
-}
-
-export function getLinkStore() {
-  // Makers creates this Blob namespace automatically on its first use. No
-  // dashboard binding or storage credential is needed inside an Edge Function.
-  return getStore(STORE_NAME);
 }
 
 export function getSecrets(context) {
@@ -148,25 +139,6 @@ export function normaliseTitle(input) {
   return String(input).trim().slice(0, 120);
 }
 
-export function recordKey(code) {
-  return `links/${code}.json`;
-}
-
-export async function getRecord(store, code, consistency = "strong") {
-  const record = await store.get(recordKey(code), { type: "json", consistency });
-  return record && typeof record === "object" ? record : null;
-}
-
-export async function saveNewRecord(store, record) {
-  await store.setJSON(recordKey(record.code), record, { onlyIfNew: true });
-  const saved = await getRecord(store, record.code);
-  return saved?.id === record.id;
-}
-
-export async function saveRecord(store, record) {
-  await store.setJSON(recordKey(record.code), record);
-}
-
 export function publicRecord(record) {
   return {
     code: record.code,
@@ -202,14 +174,4 @@ export async function readJson(request) {
   } catch {
     throw new Error("Invalid JSON request body");
   }
-}
-
-export async function listRecords(store) {
-  const { blobs = [] } = await store.list({ prefix: "links/", consistency: "strong" });
-  if (blobs.length > 5_000) throw new Error("Too many links to list in one request");
-  const records = await Promise.all(blobs.map(async ({ key }) => {
-    const value = await store.get(key, { type: "json", consistency: "strong" });
-    return value && typeof value === "object" ? publicRecord(value) : null;
-  }));
-  return records.filter(Boolean).sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
 }
