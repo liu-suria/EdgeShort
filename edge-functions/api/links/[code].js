@@ -32,7 +32,7 @@ export async function onRequestPatch(context) {
     const nextCode = body.code === undefined ? existing.code : normaliseCode(body.code);
     if (!nextCode) return json({ error: "Short code must be 1–16 letters, numbers, hyphens, or underscores, and cannot be reserved" }, 422);
     const expiresAt = body.expiresAt === undefined ? (existing.expiresAt || null) : normaliseExpiry(body.expiresAt);
-    if (expiresAt === undefined) return json({ error: "Expiration time must be a valid future date and time" }, 422);
+    if (expiresAt === undefined) return json({ error: "Expiration must be a future date/time or a whole number of days from 1 to 36500" }, 422);
     const link = { ...existing, code: nextCode, url, title: normaliseTitle(body.title), expiresAt, updatedAt: new Date().toISOString() };
     if (nextCode === existing.code) {
       await saveRecord(store, link);

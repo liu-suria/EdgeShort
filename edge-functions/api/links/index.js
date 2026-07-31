@@ -25,7 +25,7 @@ export async function onRequestPost(context) {
     const url = normaliseUrl(body.url);
     if (!url) return json({ error: "Enter a valid http:// or https:// destination URL" }, 422);
     const expiresAt = normaliseExpiry(body.expiresAt);
-    if (expiresAt === undefined) return json({ error: "Expiration time must be a valid future date and time" }, 422);
+    if (expiresAt === undefined) return json({ error: "Expiration must be a future date/time or a whole number of days from 1 to 36500" }, 422);
     const store = getLinkStore();
     let code = body.code ? normaliseCode(body.code) : null;
     if (body.code && !code) return json({ error: "Short code must be 1–16 letters, numbers, hyphens, or underscores, and cannot be reserved" }, 422);

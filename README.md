@@ -38,11 +38,12 @@ Use the key in `Authorization: Bearer ...` (or `X-API-Key`). The API returns JSO
 curl https://your-domain.com/api/v1/links \
   -H "Authorization: Bearer YOUR_API_KEY"
 
-# Create a link; code, title, and expiresAt are optional
+# Create a link; code, title, and expiresAt are optional.
+# expiresAt: 3 means the link expires three days after this request.
 curl -X POST https://your-domain.com/api/v1/links \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com/campaign","code":"summer-26","title":"Summer campaign","expiresAt":"2026-12-31T16:00:00.000Z"}'
+  -d '{"url":"https://example.com/campaign","code":"summer-26","title":"Summer campaign","expiresAt":3}'
 
 # Read, update, or delete one link
 curl https://your-domain.com/api/v1/links/summer-26 \
@@ -55,7 +56,7 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
+`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. For API calls, pass `expiresAt` as a whole number of days (for example, `3` expires in three days); ISO date/time strings remain supported for compatibility with the admin. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
 
 ## Project layout
 

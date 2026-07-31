@@ -139,10 +139,17 @@ export function normaliseTitle(input) {
   return String(input).trim().slice(0, 120);
 }
 
-// An empty value deliberately means "never expires". Invalid or past values
-// are kept distinct so API handlers can return a useful validation error.
+// An empty value deliberately means "never expires". The admin supplies an ISO
+// date string; API clients can instead supply a whole number of days (for
+// example, `3` means the link expires three days after this request).
+// Invalid or past values are kept distinct so API handlers can return a useful
+// validation error.
 export function normaliseExpiry(input) {
   if (input === undefined || input === null || String(input).trim() === "") return null;
+  if (typeof input === "number") {
+    if (!Number.isSafeInteger(input) || input < 1 || input > 36_500) return undefined;
+    return new Date(Date.now() + input * 86_400_000).toISOString();
+  }
   if (typeof input !== "string" || input.length > 80) return undefined;
   const time = Date.parse(input);
   if (!Number.isFinite(time) || time <= Date.now()) return undefined;

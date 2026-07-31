@@ -71,8 +71,10 @@
     el.table.innerHTML = links.map((link) => {
       const short = shortUrl(link.code);
       const remark = link.title ? escapeHtml(link.title) : "—";
-      const expiry = link.expiresAt ? `<span class="expiry">${t("expires", { date: formatDateTime(link.expiresAt) })}</span>` : "";
-      return `<tr><td class="remark-cell" title="${escapeHtml(link.title || "")}">${remark}</td><td class="code-cell"><a class="short-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(short)}">/${escapeHtml(link.code)}</a>${expiry}</td><td><a class="destination" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number">${formatNumber(link.visits)}</td><td><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-copy="${escapeHtml(link.code)}">${t("copy")}</button><button class="row-action" type="button" data-edit="${escapeHtml(link.code)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.code)}">${t("delete")}</button></div></td></tr>`;
+      const expiry = link.expiresAt
+        ? `<span class="expiry">${formatDateTime(link.expiresAt)}</span>`
+        : `<span class="expiry expiry-never">${t("neverExpires")}</span>`;
+      return `<tr><td class="remark-cell" title="${escapeHtml(link.title || "")}">${remark}</td><td class="code-cell"><a class="short-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(short)}">/${escapeHtml(link.code)}</a></td><td><a class="destination" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number">${formatNumber(link.visits)}</td><td>${expiry}</td><td><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions"><button class="row-action" type="button" data-copy="${escapeHtml(link.code)}">${t("copy")}</button><button class="row-action" type="button" data-edit="${escapeHtml(link.code)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.code)}">${t("delete")}</button></div></td></tr>`;
     }).join("");
   }
   async function loadLinks() {
@@ -107,7 +109,7 @@
   }
   function closeDialog() { el.dialog.close(); }
   function apiUrl() { return `${origin()}/api/v1/links`; }
-  function apiExample() { return `curl -X POST ${apiUrl()} \\\n+  -H "Authorization: Bearer YOUR_API_KEY" \\\n+  -H "Content-Type: application/json" \\\n+  -d '{"url":"https://example.com","code":"my-link","title":"示例"}'`; }
+  function apiExample() { return `curl -X POST ${apiUrl()} \\\n+  -H "Authorization: Bearer YOUR_API_KEY" \\\n+  -H "Content-Type: application/json" \\\n+  -d '{"url":"https://example.com","code":"my-link","title":"示例","expiresAt":3}'`; }
   function renderApiKeys() {
     const keys = state.apiKeys;
     el.apiKeysSummary.textContent = t("apiKeyCount", { count: keys.length });

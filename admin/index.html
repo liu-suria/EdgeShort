@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0b1020">
     <title>EdgeShort — 管理后台</title>
-    <link rel="stylesheet" href="/admin/style.css?v=20260731-6">
+    <link rel="stylesheet" href="/admin/style.css?v=20260731-7">
   </head>
   <body>
     <div class="app-shell">
@@ -49,7 +49,7 @@
             <div class="loading-state" id="loading-state"><span class="spinner" aria-hidden="true"></span> <span data-i18n="loadingLinks">正在加载链接</span></div>
             <div class="empty-state" id="empty-state" hidden><div class="empty-icon">↗</div><h3 data-i18n="noLinks">还没有链接</h3><p data-i18n="noLinksDescription">新建第一条短链接，它会显示在这里。</p><button class="button button-primary" type="button" data-new-link data-i18n="newLink">新建链接</button></div>
             <div class="table-wrap" id="table-wrap" hidden>
-              <table><thead><tr><th data-i18n="remark">备注</th><th data-i18n="customCode">自定义短码</th><th data-i18n="destination">目标地址</th><th class="number" data-i18n="visits">访问</th><th data-i18n="updated">更新时间</th><th><span class="sr-only" data-i18n="actions">操作</span></th></tr></thead><tbody id="links-table"></tbody></table>
+              <table><thead><tr><th data-i18n="remark">备注</th><th data-i18n="customCode">自定义短码</th><th data-i18n="destination">目标地址</th><th class="number" data-i18n="visits">访问</th><th data-i18n="expiresAt">过期时间</th><th data-i18n="updated">更新时间</th><th><span class="sr-only" data-i18n="actions">操作</span></th></tr></thead><tbody id="links-table"></tbody></table>
             </div>
           </section>
         </section>
@@ -80,6 +80,6 @@
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="/admin/app.js?v=20260731-6" defer></script>
+    <script src="/admin/app.js?v=20260731-7" defer></script>
   </body>
 </html>
