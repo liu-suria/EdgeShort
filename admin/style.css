@@ -5,6 +5,9 @@ button, input { font: inherit; }
 button { cursor: pointer; }
 .app-shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 .topbar { min-height: 82px; display: flex; align-items: center; justify-content: space-between; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.language-button { min-width: 42px; min-height: 36px; padding: 0 10px; color: var(--blue-strong); border: 1px solid var(--line); border-radius: 9px; font-size: .75rem; font-weight: 760; letter-spacing: .04em; background: rgba(255,255,255,.025); }
+.language-button:hover { color: #dceaff; border-color: #41557f; background: rgba(255,255,255,.055); }
 .brand { color: var(--text); text-decoration: none; font-size: 1.08rem; font-weight: 780; letter-spacing: -.03em; display: inline-flex; align-items: center; gap: 9px; }
 .brand-mark, .empty-icon { width: 29px; height: 29px; display: grid; place-items: center; color: #071120; border-radius: 9px; background: linear-gradient(135deg, #8fc2ff, #8491ff); font-size: 19px; font-weight: 900; }
 .button { border: 0; border-radius: 10px; min-height: 42px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 720; transition: transform .16s ease, background .16s ease, border-color .16s ease; }

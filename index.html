@@ -79,6 +79,9 @@
       }
       .admin-link:hover { transform: translateY(-1px); background: rgba(255,255,255,.07); border-color: rgba(185, 205, 255, .3); }
       .admin-link span { color: var(--blue); font-size: 1rem; }
+      .top-actions { display: flex; align-items: center; gap: 10px; }
+      .language-button { min-width: 42px; min-height: 40px; padding: 0 10px; color: #c8d7f4; font-size: .76rem; font-weight: 760; letter-spacing: .04em; background: rgba(255,255,255,.025); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .language-button:hover { color: #fff; background: rgba(255,255,255,.07); border-color: rgba(185, 205, 255, .3); }
       main { padding: clamp(58px, 10vw, 138px) 0 54px; }
       .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .88fr); align-items: center; gap: clamp(48px, 8vw, 124px); }
       .eyebrow {
@@ -172,6 +175,7 @@
       }
       @media (max-width: 420px) {
         .admin-link { min-height: 36px; padding: 0 10px; }
+        .language-button { min-height: 36px; min-width: 38px; padding: 0 8px; }
         .admin-link em { display: none; }
         .hero-actions { align-items: flex-start; flex-direction: column; gap: 14px; }
         .short-link { margin: 25px 0 21px; }
@@ -183,35 +187,55 @@
     <div class="page">
       <header class="topbar">
         <a class="brand" href="/" aria-label="EdgeShort 首页"><span class="brand-mark">↗</span><span class="brand-name">EdgeShort</span></a>
-        <a class="admin-link" href="/admin/"><span>↗</span><em>进入管理后台</em></a>
+        <div class="top-actions"><button class="language-button" id="language-toggle" type="button" aria-label="Switch to English">EN</button><a class="admin-link" href="/admin/"><span>↗</span><em data-i18n="admin">进入管理后台</em></a></div>
       </header>
       <main>
         <section class="hero" aria-labelledby="hero-title">
           <div>
-            <span class="eyebrow">PRIVATE URL SHORTENER</span>
-            <h1 id="hero-title">让每一个链接，<em>更利落地抵达。</em></h1>
-            <p class="intro">一个只属于你的短链接空间。创建、管理、追踪，所有操作都在你自己的 EdgeOne 边缘网络上完成。</p>
+            <span class="eyebrow" data-i18n="eyebrow">私人短链接</span>
+            <h1 id="hero-title"><span data-i18n="heroBefore">让每一个链接，</span><em data-i18n="heroEm">更利落地抵达。</em></h1>
+            <p class="intro" data-i18n="intro">一个只属于你的短链接空间。创建、管理、追踪，所有操作都在你自己的 EdgeOne 边缘网络上完成。</p>
             <div class="hero-actions">
-              <a class="primary-button" href="/admin/">管理短链接 <strong aria-hidden="true">→</strong></a>
-              <span class="private-note"><b>PRIVATE BY DESIGN</b>仅管理员可管理</span>
+              <a class="primary-button" href="/admin/"><span data-i18n="manage">管理短链接</span> <strong aria-hidden="true">→</strong></a>
+              <span class="private-note"><b data-i18n="privateByDesign">私有设计</b><span data-i18n="adminOnly">仅管理员可管理</span></span>
             </div>
           </div>
           <div class="preview" aria-label="短链接示例">
             <div class="link-card">
-              <div class="card-top"><span>LINK PREVIEW</span><span class="live"><i></i> ACTIVE</span></div>
-              <div class="short-link"><div><small>YOUR SHORT LINK</small><b>go.yourdomain.com/hello</b></div><span class="copy" aria-hidden="true">⧉</span></div>
-              <div class="destination"><span class="destination-icon" aria-hidden="true">↗</span><div><small>DESTINATION</small><b>https://example.com/your-destination</b></div></div>
-              <div class="card-footer"><div class="metric"><span>访问次数</span><strong>2,481</strong></div><div class="metric"><span>状态</span><strong>正常</strong></div><div class="metric"><span>更新于</span><strong>刚刚</strong></div></div>
+              <div class="card-top"><span data-i18n="preview">链接预览</span><span class="live"><i></i> <span data-i18n="active">正常</span></span></div>
+              <div class="short-link"><div><small data-i18n="yourShortLink">你的短链接</small><b>go.yourdomain.com/hello</b></div><span class="copy" aria-hidden="true">⧉</span></div>
+              <div class="destination"><span class="destination-icon" aria-hidden="true">↗</span><div><small data-i18n="destination">目标地址</small><b>https://example.com/your-destination</b></div></div>
+              <div class="card-footer"><div class="metric"><span data-i18n="visits">访问次数</span><strong>2,481</strong></div><div class="metric"><span data-i18n="status">状态</span><strong data-i18n="normal">正常</strong></div><div class="metric"><span data-i18n="updated">更新于</span><strong data-i18n="justNow">刚刚</strong></div></div>
             </div>
           </div>
         </section>
         <section class="principles" aria-label="产品特点">
-          <article class="principle"><span class="principle-number">01</span><h2>干净的链接</h2><p>自动生成或自定义短码，让分享更直观。</p></article>
-          <article class="principle"><span class="principle-number">02</span><h2>边缘快速跳转</h2><p>请求由 EdgeOne Edge Functions 就近处理。</p></article>
-          <article class="principle"><span class="principle-number">03</span><h2>仅你可管理</h2><p>密码登录后台，链接数据私密保存。</p></article>
+          <article class="principle"><span class="principle-number">01</span><h2 data-i18n="principleOne">干净的链接</h2><p data-i18n="principleOneText">自动生成或自定义短码，让分享更直观。</p></article>
+          <article class="principle"><span class="principle-number">02</span><h2 data-i18n="principleTwo">边缘快速跳转</h2><p data-i18n="principleTwoText">请求由 EdgeOne Edge Functions 就近处理。</p></article>
+          <article class="principle"><span class="principle-number">03</span><h2 data-i18n="principleThree">仅你可管理</h2><p data-i18n="principleThreeText">密码登录后台，链接数据私密保存。</p></article>
         </section>
       </main>
-      <footer><span>© 2026 EdgeShort</span><span>Built for your own links.</span></footer>
+      <footer><span>© 2026 EdgeShort</span><span data-i18n="footer">为你的链接而构建。</span></footer>
     </div>
+    <script>
+      (() => {
+        const messages = {
+          zh: { title: "EdgeShort — 简洁的短链接", admin: "进入管理后台", eyebrow: "私人短链接", heroBefore: "让每一个链接，", heroEm: "更利落地抵达。", intro: "一个只属于你的短链接空间。创建、管理、追踪，所有操作都在你自己的 EdgeOne 边缘网络上完成。", manage: "管理短链接", privateByDesign: "私有设计", adminOnly: "仅管理员可管理", preview: "链接预览", active: "正常", yourShortLink: "你的短链接", destination: "目标地址", visits: "访问次数", status: "状态", normal: "正常", updated: "更新于", justNow: "刚刚", principleOne: "干净的链接", principleOneText: "自动生成或自定义短码，让分享更直观。", principleTwo: "边缘快速跳转", principleTwoText: "请求由 EdgeOne Edge Functions 就近处理。", principleThree: "仅你可管理", principleThreeText: "密码登录后台，链接数据私密保存。", footer: "为你的链接而构建。" },
+          en: { title: "EdgeShort — Private URL shortener", admin: "Admin", eyebrow: "PRIVATE URL SHORTENER", heroBefore: "Make every link", heroEm: "arrive with clarity.", intro: "A short-link space that belongs only to you. Create, manage, and track every link on your own EdgeOne edge network.", manage: "Manage links", privateByDesign: "PRIVATE BY DESIGN", adminOnly: "Only you can manage", preview: "LINK PREVIEW", active: "ACTIVE", yourShortLink: "YOUR SHORT LINK", destination: "DESTINATION", visits: "Visits", status: "Status", normal: "Active", updated: "Updated", justNow: "Just now", principleOne: "Cleaner links", principleOneText: "Generate or choose a custom code for clearer sharing.", principleTwo: "Fast at the edge", principleTwoText: "Requests are handled nearby by EdgeOne Edge Functions.", principleThree: "Private by default", principleThreeText: "Password-protected management and private link storage.", footer: "Built for your own links." },
+        };
+        let language = localStorage.getItem("edgeshort:language") === "en" ? "en" : "zh";
+        const toggle = document.querySelector("#language-toggle");
+        const render = () => {
+          const copy = messages[language];
+          document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+          document.title = copy.title;
+          document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = copy[node.dataset.i18n]; });
+          toggle.textContent = language === "zh" ? "EN" : "中文";
+          toggle.setAttribute("aria-label", language === "zh" ? "Switch to English" : "切换至中文");
+        };
+        toggle.addEventListener("click", () => { language = language === "zh" ? "en" : "zh"; localStorage.setItem("edgeshort:language", language); render(); });
+        render();
+      })();
+    </script>
   </body>
 </html>
