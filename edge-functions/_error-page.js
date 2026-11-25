@@ -27,7 +27,7 @@ export function shortLinkErrorPage(kind, code) {
   const info = KINDS[kind] || KINDS.error;
   const shown = code ? `/${escapeHtml(String(code).slice(0, 40))}` : "";
   const html = `<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#fff7ec"><title>${escapeHtml(info.badge)} · 柿柿短链</title><style>${STYLE}</style></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#fff7ec"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon.ico" sizes="48x48"><title>${escapeHtml(info.badge)} · 柿柿短链</title><style>${STYLE}</style></head>
 <body><main class="card"><div class="body"><div class="brand">${LOGO}<span>柿柿短链</span></div><span class="badge"><span aria-hidden="true">${info.icon}</span>${escapeHtml(info.badge)}</span><h1>${escapeHtml(info.title)}</h1><p>${escapeHtml(info.message)}</p>${shown ? `<div class="code">${shown}</div>` : ""}</div><div class="foot"><span>错误代码 ${info.status}</span><a href="/">回到首页</a></div></main></body></html>`;
   return new Response(html, { status: info.status, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", ...(info.status === 503 ? { "Retry-After": "5" } : {}) } });
 }
