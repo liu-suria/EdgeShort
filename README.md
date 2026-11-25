@@ -56,7 +56,28 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-`GET /api/v1/links?q=keyword` searches links. `POST` requires `url`; `POST` and `PATCH` accept `url`, plus optional `code`, `title`, and `expiresAt`. Pass `expiresAt` as a whole number of days (for example, `3` expires in three days). The admin uses the same day-based setting and displays the resulting date as `2026年7月31日`; ISO date/time strings remain supported by the API for compatibility. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
+### Query and response
+
+`GET /api/v1/links` accepts `q` (search code, URL, title), `status` (`active` or `expired`), `limit` (1–500, default 100) and `offset`. It returns `{ links, total, limit, offset, hasMore }`; `total` counts all matches, not just this page.
+
+Every link looks like:
+
+```json
+{
+  "code": "summer-26",
+  "shortUrl": "https://your-domain.com/summer-26",
+  "url": "https://example.com/campaign",
+  "title": "Summer campaign",
+  "status": "active",
+  "expiresAt": "2026-08-03T00:00:00.000Z",
+  "visits": 12,
+  "lastVisitAt": "2026-07-31T08:12:00.000Z",
+  "createdAt": "...",
+  "updatedAt": "..."
+}
+```
+
+`POST` requires `url`; `POST` and `PATCH` accept `url`, plus optional `code`, `title`, and `expiresAt`. Pass `expiresAt` as a whole number of days (for example, `3` expires in three days); ISO date/time strings and an empty value (never expires) also work. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`. A destination that points at a short link on this same site is rejected, because it could redirect in a loop. Errors are JSON: `{ "error": "..." }`.
 
 ## Project layout
 
@@ -83,6 +104,8 @@ test/                     # `npm test` (in-memory Blob stand-in, no network)
 - **Login limiter**: 5 wrong passwords within 15 minutes locks that client IP out for the rest of the window. The IP comes from `EO-Connecting-IP` (falling back to `X-Real-IP` / `X-Forwarded-For`).
 - **Sessions** are stateless signed cookies; to sign out everywhere, change `SESSION_SECRET`.
 - `PATCH` only changes the fields you send.
-- Admin list/search reads every link once, which is fine for personal use (up to 5,000 links).
+- Listing reads every link once (up to 5,000), so `limit`/`offset` shrink the response, not the work. The admin loads the list once and searches in the browser.
+- Admin static files (`app.js`, `style.css`, `qrcode.min.js`) are cached for a day; bump the `?v=` in `admin/index.html` whenever you change them.
+- `.github/workflows/test.yml` runs `npm test` on every push and pull request.
 - Redirects return `302`, so changing a destination never fights a browser's permanent cache.
 - Never commit real values for `ADMIN_PASSWORD` or `SESSION_SECRET`. `.env.example` is documentation only.

@@ -77,9 +77,13 @@ export async function saveRecord(store, record) {
   await store.setJSON(recordKey(record.code), record);
 }
 
-export async function getVisits(store, code) {
+export async function getVisitInfo(store, code) {
   const value = asObject(await store.get(visitsKey(code), { type: "json", consistency: "strong" }));
-  return Number(value?.count) || 0;
+  return { count: Number(value?.count) || 0, at: value?.at || null };
+}
+
+export async function getVisits(store, code) {
+  return (await getVisitInfo(store, code)).count;
 }
 
 export async function setVisits(store, code, count) {
@@ -90,7 +94,7 @@ export async function addVisits(store, code, delta) {
   await setVisits(store, code, (await getVisits(store, code)) + delta);
 }
 
-// Records returned here carry `visits` = legacy in-record count + counter blob.
+// Records returned here carry `visits` (legacy in-record count + counter blob) and `lastVisitAt`.
 export async function listRecords(store) {
   const [linkKeys, visitKeys] = await Promise.all([
     listKeys(store, "links/", MAX_LINKS),
@@ -101,10 +105,13 @@ export async function listRecords(store) {
     // One unreadable counter must not break the whole list; it counts as 0.
     mapLimit(visitKeys, READ_CONCURRENCY, async (key) => [key, asObject(await store.get(key, { type: "json", consistency: "strong" }).catch(() => null))]),
   ]);
-  const visits = new Map(counters.map(([key, value]) => [key.slice("visits/".length, -".json".length), Number(value?.count) || 0]));
+  const visits = new Map(counters.map(([key, value]) => [key.slice("visits/".length, -".json".length), value]));
   return records
     .filter(Boolean)
-    .map((record) => ({ ...record, visits: (Number(record.visits) || 0) + (visits.get(record.code) || 0) }))
+    .map((record) => {
+      const counter = visits.get(record.code);
+      return { ...record, visits: (Number(record.visits) || 0) + (Number(counter?.count) || 0), lastVisitAt: counter?.at || null };
+    })
     .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
 }
 

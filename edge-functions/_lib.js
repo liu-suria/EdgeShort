@@ -181,13 +181,17 @@ export function normaliseExpiry(input) {
   return new Date(time).toISOString();
 }
 
-export function publicRecord(record) {
+export function publicRecord(record, origin = "") {
+  const expired = Boolean(record.expiresAt) && Date.parse(record.expiresAt) <= Date.now();
   return {
     code: record.code,
+    shortUrl: `${origin}/${record.code}`,
     url: record.url,
     title: record.title || "",
+    status: expired ? "expired" : "active",
     expiresAt: record.expiresAt || null,
     visits: Number(record.visits) || 0,
+    lastVisitAt: record.lastVisitAt || null,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
   };

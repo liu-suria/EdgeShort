@@ -123,7 +123,7 @@ describe("links service", () => {
   test("legacy in-record visits are still counted", async () => {
     await store.setJSON("links/old.json", { id: "1", code: "old", url: "https://e.com/", visits: 5, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" });
     await store.setJSON("visits/old.json", { count: 2 });
-    assert.equal((await listLinks(store)).links[0].visits, 7);
+    assert.equal((await listLinks(store, new URLSearchParams())).links[0].visits, 7);
   });
 
   test("renaming moves the counter and frees the old code; duplicates conflict", async () => {
@@ -155,7 +155,40 @@ describe("links service", () => {
     await store.setJSON("visits/abc.json", { count: 3 });
     const realGet = store.get.bind(store);
     store.get = async (key, ...rest) => { if (key.startsWith("visits/")) throw new Error("bad"); return realGet(key, ...rest); };
-    assert.equal((await listLinks(store)).total, 1);
+    assert.equal((await listLinks(store, new URLSearchParams())).total, 1);
+  });
+
+  test("refuses destinations that would loop back into this site", async () => {
+    const ctx = { origin: "https://x.test", host: "x.test" };
+    await assert.rejects(createLink(store, { url: "https://x.test/abc" }, ctx), { status: 422, message: /loop/ });
+    await assert.rejects(createLink(store, { url: "https://X.TEST/abc/" }, ctx), { status: 422 });
+    await createLink(store, { url: "https://x.test/" }, ctx);
+    await createLink(store, { url: "https://x.test/admin/" }, ctx);
+    await createLink(store, { url: "https://other.test/abc" }, ctx);
+    await createLink(store, { url: "https://example.com/fine", code: "ok" }, ctx);
+    await assert.rejects(updateLink(store, "ok", { url: "https://x.test/ok" }, ctx), { status: 422 });
+    assert.equal((await updateLink(store, "ok", { title: "t" }, ctx)).link.url, "https://example.com/fine");
+  });
+
+  test("API shape: shortUrl, status, lastVisitAt; filtering and pagination", async () => {
+    const ctx = { origin: "https://x.test", host: "x.test" };
+    for (const code of ["a1", "a2", "a3"]) await createLink(store, { url: "https://example.com/" + code, code }, ctx);
+    await store.setJSON("links/old.json", { id: "9", code: "old", url: "https://e.com/", createdAt: "2020-01-01T00:00:00Z", expiresAt: new Date(Date.now() - 1000).toISOString() });
+    await store.setJSON("visits/a1.json", { count: 2, at: "2026-11-01T00:00:00.000Z" });
+    const all = await listLinks(store, new URLSearchParams(), "https://x.test");
+    assert.equal(all.total, 4);
+    const a1 = all.links.find((l) => l.code === "a1");
+    assert.equal(a1.shortUrl, "https://x.test/a1");
+    assert.equal(a1.status, "active");
+    assert.equal(a1.lastVisitAt, "2026-11-01T00:00:00.000Z");
+    assert.equal((await listLinks(store, new URLSearchParams("status=expired"))).links[0].code, "old");
+    const page = await listLinks(store, new URLSearchParams("limit=2&offset=1"));
+    assert.equal(page.links.length, 2);
+    assert.equal(page.total, 4);
+    assert.equal(page.hasMore, true);
+    assert.equal((await listLinks(store, new URLSearchParams("limit=2&offset=2"))).hasMore, false);
+    await assert.rejects(listLinks(store, new URLSearchParams("limit=0")), { status: 422 });
+    await assert.rejects(listLinks(store, new URLSearchParams("status=zzz")), { status: 422 });
   });
 
   test("validation errors", async () => {
