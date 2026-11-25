@@ -1,4 +1,4 @@
-# EdgeShort
+# 柿柿短链 (EdgeShort)
 
 A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and built-in Blob storage—no framework, storage binding, database, or client-side secrets.
 
@@ -56,24 +56,33 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-`GET /api/v1/links?q=keyword` searches links. `POST` and `PATCH` accept `url` (required), plus optional `code`, `title`, and `expiresAt`. Pass `expiresAt` as a whole number of days (for example, `3` expires in three days). The admin uses the same day-based setting and displays the resulting date as `2026年7月31日`; ISO date/time strings remain supported by the API for compatibility. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
+`GET /api/v1/links?q=keyword` searches links. `POST` requires `url`; `POST` and `PATCH` accept `url`, plus optional `code`, `title`, and `expiresAt`. Pass `expiresAt` as a whole number of days (for example, `3` expires in three days). The admin uses the same day-based setting and displays the resulting date as `2026年7月31日`; ISO date/time strings remain supported by the API for compatibility. Custom codes must be 1–16 characters and use only letters, numbers, `_`, or `-`.
 
 ## Project layout
 
 ```text
 admin/                    # Plain HTML, CSS, and browser JavaScript
 edge-functions/
-  [code].js               # Public redirect
+  [code].js               # Public redirect (hot path)
+  _redirect.js            # Link cache + coalesced visit counting
+  _links.js               # Link logic shared by the admin API and /api/v1
+  _storage.js             # Blob keys and reads/writes
+  _ratelimit.js           # Login failure limiter
   api/auth/*              # Password login and session endpoints
-  api/links/*             # Authenticated CRUD API
-  _lib.js                 # Validation, cookie signing, and Blob helpers
-edgeone.json              # /admin redirect and security headers
+  api/links/*             # Admin (session) API
+  api/v1/links/*          # Public (API key) API
+  api/api-keys/*          # API key management
+test/                     # `npm test` (in-memory Blob stand-in, no network)
 ```
 
 ## Operational notes
 
-- Blob does not need a console binding: the Makers function opens the `edgeshort-links` namespace directly and the platform creates it automatically on first use.
-- Link writes and admin reads use Blob strong consistency. The public redirect uses the faster eventual-consistency read, so a just-created or edited link can take a few seconds to propagate globally.
-- Blob does not provide an atomic increment, so the visit counter is intentionally best-effort. It is ideal for personal/low-concurrency use, but simultaneous requests can occasionally coalesce into one count.
-- Redirects return `302`, so changing a destination takes effect without a browser permanently caching the old target.
-- Never commit real values for `ADMIN_PASSWORD` or `SESSION_SECRET`. `.env.example` is documentation only; configure the actual values in Makers.
+- **Fast redirects**: a redirect is one eventually-consistent Blob read, memoised for 30 seconds per edge instance, then a `302`. Unknown or malformed paths (`/favicon.ico`, scanners) are rejected without touching storage. Because of the cache, an edit or delete can take up to ~30 seconds (plus Blob propagation) to show on every instance.
+- **Visit counts are best effort**: Blob has no atomic increment, so counts live in their own `visits/<code>.json` blob (an edit can never be overwritten by a count) and are coalesced to at most one write per code per ~10 seconds per instance. Counts older than this release stored in the link record are still added in.
+- **API keys** embed their id (`esk_<id>.<secret>`), so authentication is a single read. Keys issued by older versions keep working through a slower scan. `lastUsedAt` is written at most every 10 minutes.
+- **Login limiter**: 5 wrong passwords within 15 minutes locks that client IP out for the rest of the window. The IP comes from `EO-Connecting-IP` (falling back to `X-Real-IP` / `X-Forwarded-For`).
+- **Sessions** are stateless signed cookies; to sign out everywhere, change `SESSION_SECRET`.
+- `PATCH` only changes the fields you send.
+- Admin list/search reads every link once, which is fine for personal use (up to 5,000 links).
+- Redirects return `302`, so changing a destination never fights a browser's permanent cache.
+- Never commit real values for `ADMIN_PASSWORD` or `SESSION_SECRET`. `.env.example` is documentation only.

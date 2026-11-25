@@ -28,7 +28,7 @@
   function t(key, values = {}) { return (translations[state.language][key] || key).replace(/\{(\w+)\}/g, (_, name) => values[name] ?? ""); }
   function applyLanguage() {
     document.documentElement.lang = state.language === "zh" ? "zh-CN" : "en";
-    document.title = state.language === "zh" ? "EdgeShort — 管理后台" : "EdgeShort — Admin";
+    document.title = state.language === "zh" ? "柿柿短链 — 管理后台" : "柿柿短链 — Admin";
     document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
     document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
     el.languageToggle.textContent = state.language === "zh" ? "EN" : "中文";
@@ -110,7 +110,7 @@
   }
   function closeDialog() { el.dialog.close(); }
   function apiUrl() { return `${origin()}/api/v1/links`; }
-  function apiExample() { return `curl -X POST ${apiUrl()} \\\n+  -H "Authorization: Bearer YOUR_API_KEY" \\\n+  -H "Content-Type: application/json" \\\n+  -d '{"url":"https://example.com","code":"my-link","title":"示例","expiresAt":3}'`; }
+  function apiExample() { return `curl -X POST ${apiUrl()} \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url":"https://example.com","code":"my-link","title":"示例","expiresAt":3}'`; }
   function renderApiKeys() {
     const keys = state.apiKeys;
     el.apiKeysSummary.textContent = t("apiKeyCount", { count: keys.length });
@@ -137,10 +137,22 @@
     try { await request(`/api/api-keys/${encodeURIComponent(id)}`, { method: "DELETE" }); await loadApiKeys(); showToast(t("apiKeyRevokedToast")); } catch (error) { showToast(error.message); }
   }
   async function copy(code) { try { await navigator.clipboard.writeText(shortUrl(code)); showToast(t("copied")); } catch { showToast(t("copyFailed")); } }
+  // The QR library is only needed once someone opens a code, so load it lazily.
+  function loadQrLibrary() {
+    if (window.QRCode) return Promise.resolve(true);
+    loadQrLibrary.promise ||= new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "/admin/qrcode.min.js?v=1";
+      script.onload = () => resolve(Boolean(window.QRCode));
+      script.onerror = () => { loadQrLibrary.promise = null; resolve(false); };
+      document.head.append(script);
+    });
+    return loadQrLibrary.promise;
+  }
   async function renderQr(control) {
     const holder = control.querySelector(".qr-canvas");
     if (holder.dataset.ready === "true") return true;
-    if (!window.QRCode) { showToast(t("qrCodeFailed")); return false; }
+    if (!await loadQrLibrary()) { showToast(t("qrCodeFailed")); return false; }
     try {
       new window.QRCode(holder, { text: shortUrl(control.querySelector("[data-qr]").dataset.qr), width: 176, height: 176, colorDark: "#0b1020", colorLight: "#ffffff", correctLevel: window.QRCode.CorrectLevel.M });
       holder.dataset.ready = "true";

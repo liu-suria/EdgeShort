@@ -9,8 +9,23 @@ const RESERVED_CODES = new Set([
   "edge-functions", "cloud-functions", "index", "login", "logout",
 ]);
 
+export class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+// Expected failures (HttpError) keep their own status and message. Anything else
+// is logged and answered with a generic message so internals are never leaked.
+export function errorResponse(error, respond, fallback) {
+  if (error instanceof HttpError) return respond({ error: error.message }, error.status);
+  console.error(fallback, error);
+  return respond({ error: fallback }, 500);
+}
+
 export function json(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
+  return new Response(status === 204 || status === 304 ? null : JSON.stringify(data), {
     status,
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -117,6 +132,16 @@ export function requireAuth(context) {
   ));
 }
 
+export function isCodeShape(input) {
+  return typeof input === "string" && CODE_PATTERN.test(input) && !RESERVED_CODES.has(input.toLowerCase());
+}
+
+export function clientIp(request) {
+  const headers = request.headers;
+  return (headers.get("EO-Connecting-IP") || headers.get("X-Real-IP") || headers.get("X-Forwarded-For") || "unknown")
+    .split(",")[0].trim().slice(0, 64) || "unknown";
+}
+
 export function normaliseCode(input) {
   const code = String(input || "").trim();
   if (!CODE_PATTERN.test(code) || RESERVED_CODES.has(code.toLowerCase())) return null;
@@ -180,8 +205,13 @@ export function makeRecordId() {
   return toBase64Url(crypto.getRandomValues(new Uint8Array(18)));
 }
 
+// New keys look like `esk_<16 hex id>.<secret>`; the id lets authentication
+// load exactly one record instead of scanning every key.
+export const API_KEY_FORMAT = /^esk_([0-9a-f]{16})\.[A-Za-z0-9_-]{43}$/;
+
 export function makeApiKey() {
-  return `esk_${toBase64Url(crypto.getRandomValues(new Uint8Array(32)))}`;
+  const id = Array.from(crypto.getRandomValues(new Uint8Array(8)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return { id, value: `esk_${id}.${toBase64Url(crypto.getRandomValues(new Uint8Array(32)))}` };
 }
 
 export function normaliseApiKeyName(input) {
@@ -191,14 +221,14 @@ export function normaliseApiKeyName(input) {
 
 export async function readJson(request) {
   const contentLength = Number(request.headers.get("Content-Length") || 0);
-  if (contentLength > 10_240) throw new Error("Request body is too large");
+  if (contentLength > 10_240) throw new HttpError(413, "Request body is too large");
   const body = await request.text();
-  if (body.length > 10_240) throw new Error("Request body is too large");
+  if (body.length > 10_240) throw new HttpError(413, "Request body is too large");
   try {
     const data = JSON.parse(body || "{}");
     if (!data || Array.isArray(data) || typeof data !== "object") throw new Error();
     return data;
   } catch {
-    throw new Error("Invalid JSON request body");
+    throw new HttpError(400, "Invalid JSON request body");
   }
 }
