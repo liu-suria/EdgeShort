@@ -116,18 +116,51 @@ export async function pair(input, name, save, display) {
 export async function serve(input, key, stdin = process.stdin, stdout = process.stdout) {
   const endpoint = checkedOrigin(input) + "/api/mcp";
   let version;
+  let readiness;
+  async function forward(rpc) {
+    const headers = { Authorization: "Bearer " + key };
+    if (version) headers["MCP-Protocol-Version"] = version;
+    const r = await post(endpoint, rpc, headers);
+    if (!r.ok) throw Error("EdgeShort returned HTTP " + r.status);
+    if (r.status === 202 && rpc.id === undefined) return null;
+    const reply = await r.json();
+    if (reply.jsonrpc !== "2.0" || reply.id !== rpc.id) throw Error("Invalid MCP response");
+    return reply;
+  }
+
   for await (const line of createInterface({ input: stdin, crlfDelay: Infinity })) {
     if (!line.trim()) continue;
     let rpc;
     try {
       rpc = JSON.parse(line);
-      const headers = { Authorization: "Bearer " + key };
-      if (version) headers["MCP-Protocol-Version"] = version;
-      const r = await post(endpoint, rpc, headers);
-      if (r.status === 202) continue;
-      if (!r.ok) throw Error("EdgeShort returned HTTP " + r.status);
-      const reply = await r.json();
-      if (reply.jsonrpc !== "2.0" || reply.id !== rpc.id) throw Error("Invalid MCP response");
+      if (rpc.method === "notifications/initialized" && rpc.id === undefined && version && !readiness) {
+        // Send the required notification immediately. It has no server-side
+        // session state; only discovery may overlap its acknowledgement.
+        readiness = forward(rpc).then(
+          () => null,
+          error => error,
+        );
+        continue;
+      }
+      let reply;
+      if (readiness) {
+        if (rpc.method === "initialize") {
+          await readiness;
+          readiness = undefined;
+          version = undefined;
+        } else if (rpc.method === "tools/list" && rpc.id !== undefined) {
+          const [error, discovery] = await Promise.all([readiness, forward(rpc)]);
+          if (error) throw error;
+          readiness = undefined;
+          reply = discovery;
+        } else {
+          const error = await readiness;
+          if (error) throw error;
+          readiness = undefined;
+        }
+      }
+      reply ??= await forward(rpc);
+      if (!reply) continue;
       if (rpc.method === "initialize") version = reply.result?.protocolVersion;
       stdout.write(JSON.stringify(reply) + "\n");
     } catch (error) {
@@ -146,6 +179,7 @@ export async function serve(input, key, stdin = process.stdin, stdout = process.
         );
     }
   }
+  await readiness;
 }
 
 async function main() {
