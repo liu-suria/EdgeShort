@@ -37,30 +37,33 @@ export async function listLinks(store, params, origin = "", defaultLimit = 100, 
   let examined = 0, matched = 0;
   const records = [];
   const budget = Math.max(200, limit * 2);
-  while (i < scopes.length && (exact || (records.length < limit && examined < budget))) {
-    const name = scopes[i];
-    const size = exact ? 100 : Math.min(64, limit - records.length, budget - examined);
-    const page = await store.list({ prefix: "links/" + (name ? name + "~" : ""), limit: size,
-      cursor: marker || undefined, paginate: false, consistency: "strong" });
-    examined += page.blobs.length;
-    const keys = page.blobs.filter(item => name !== "" || !item.key.includes("~"));
-    const rows = await mapLimit(keys, 25, item => store.get(item.key, { type: "json", consistency: "strong" }));
-    for (const record of rows) {
-      if (!record?.url) continue;
-      if (needle && ![record.code, record.url, record.title].join(" ").toLowerCase().includes(needle)) continue;
-      const expired = Boolean(record.expiresAt && Date.parse(record.expiresAt) <= Date.now());
-      if (status && (status === "expired") !== expired) continue;
-      if (matched++ >= offset && records.length < limit) records.push(record);
+  async function readMappings() {
+    while (i < scopes.length && (exact || (records.length < limit && examined < budget))) {
+      const name = scopes[i];
+      const size = exact ? 100 : Math.min(64, limit - records.length, budget - examined);
+      const page = await store.list({ prefix: "links/" + (name ? name + "~" : ""), limit: size,
+        cursor: marker || undefined, paginate: false, consistency: "strong" });
+      examined += page.blobs.length;
+      const keys = page.blobs.filter(item => name !== "" || !item.key.includes("~"));
+      const rows = await mapLimit(keys, 25, item => store.get(item.key, { type: "json", consistency: "strong" }));
+      for (const record of rows) {
+        if (!record?.url) continue;
+        if (needle && ![record.code, record.url, record.title].join(" ").toLowerCase().includes(needle)) continue;
+        const expired = Boolean(record.expiresAt && Date.parse(record.expiresAt) <= Date.now());
+        if (status && (status === "expired") !== expired) continue;
+        if (matched++ >= offset && records.length < limit) records.push(record);
+      }
+      if (page.cursor) {
+        if (marker === page.cursor) throw new Error("Storage cursor did not advance");
+        marker = page.cursor;
+      } else { i++; marker = ""; }
     }
-    if (page.cursor) {
-      if (marker === page.cursor) throw new Error("Storage cursor did not advance");
-      marker = page.cursor;
-    } else { i++; marker = ""; }
   }
-  const domains = await domainRegistry(store);
-  const hydrated = await withVisitCounts(store, records);
+  const [, groupRows] = await Promise.all([readMappings(), includeGroups ? listGroups(store, allowedGroups) : []]);
+  const needsDomains = groupRows.length > 0 || records.some(record => record.code.includes("/"));
+  const [domains, hydrated] = await Promise.all([needsDomains ? domainRegistry(store) : [], withVisitCounts(store, records)]);
   const links = hydrated.map(record => publishedLink(publicRecord(record, origin), domains, origin));
-  const groups = includeGroups ? (await listGroups(store, allowedGroups)).map(row =>
+  const groups = includeGroups ? groupRows.map(row =>
     publishedGroup(publicGroup(row, origin), domains, origin, allowedGroups === undefined)) : undefined;
   const more = i < scopes.length;
   return { links, groups, limit, offset, total: exact || (!more && !params.get("cursor")) ? matched : null,

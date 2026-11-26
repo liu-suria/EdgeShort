@@ -10,16 +10,17 @@ const RESERVED_CODES = new Set([
 ]);
 
 export class HttpError extends Error {
-  constructor(status, message) {
+  constructor(status, message, details) {
     super(message);
     this.status = status;
+    this.details = details;
   }
 }
 
 // Expected failures (HttpError) keep their own status and message. Anything else
 // is logged and answered with a generic message so internals are never leaked.
 export function errorResponse(error, respond, fallback) {
-  if (error instanceof HttpError) return respond({ error: error.message }, error.status);
+  if (error instanceof HttpError) return respond({ error: error.message, details: error.details }, error.status);
   console.error(fallback, error);
   return respond({ error: fallback }, 500);
 }

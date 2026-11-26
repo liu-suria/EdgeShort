@@ -72,13 +72,15 @@ export async function getRecord(store, code, consistency = "strong") {
 async function writeIfNew(store, key, record) {
   try {
     await store.setJSON(key, record, { onlyIfNew: true });
+    return true;
   } catch (error) {
     if (error?.code !== "PRECONDITION_FAILED") throw error;
+    return false;
   }
 }
 
 export async function saveNewRecord(store, record) {
-  await writeIfNew(store, recordKey(record.code), record);
+  if (await writeIfNew(store, recordKey(record.code), record)) return true;
   const saved = await getRecord(store, record.code);
   return saved?.id === record.id;
 }
@@ -105,14 +107,14 @@ function combineCounts(left, right) {
   return { count: (Number(left?.count) || 0) + (Number(right?.count) || 0), at };
 }
 
-async function loadShardTotals(store, records) {
+async function loadShardTotals(store, records, concurrency = READ_CONCURRENCY) {
   const ids = [...new Set(records.filter(row => row?.url).map(visitId))];
-  const batches = await mapLimit(ids, READ_CONCURRENCY, async id => {
+  const batches = await mapLimit(ids, concurrency, async id => {
     const keys = await listKeys(store, shardPrefix(id), Infinity);
     return keys.map(key => ({ id, key }));
   });
   const totals = new Map();
-  await mapLimit(batches.flat(), READ_CONCURRENCY, async ({ id, key }) => {
+  await mapLimit(batches.flat(), concurrency, async ({ id, key }) => {
     const shard = await store.get(key, { type: "json", consistency: "strong" });
     totals.set(id, combineCounts(totals.get(id), shard));
   });
@@ -125,10 +127,13 @@ export async function getVisitInfo(store, record) {
 }
 
 export async function withVisitCounts(store, records) {
-  const shards = await loadShardTotals(store, records);
-  return mapLimit(records, READ_CONCURRENCY, async record => {
-    const base = await legacyCounter(store, record.code).catch(() => null);
-    const counter = combineCounts(base, shards.get(visitId(record)));
+  const lane = Math.floor(READ_CONCURRENCY / 2);
+  const [shards, bases] = await Promise.all([
+    loadShardTotals(store, records, lane),
+    mapLimit(records, lane, record => legacyCounter(store, record.code).catch(() => null)),
+  ]);
+  return records.map((record, index) => {
+    const counter = combineCounts(bases[index], shards.get(visitId(record)));
     return { ...record, visits: (Number(record.visits) || 0) + counter.count, lastVisitAt: counter.at };
   });
 }
@@ -149,7 +154,7 @@ export async function getApiKey(store, id) {
 }
 
 export async function saveNewApiKey(store, record) {
-  await writeIfNew(store, apiKeyKey(record.id), record);
+  if (await writeIfNew(store, apiKeyKey(record.id), record)) return true;
   const saved = await getApiKey(store, record.id);
   return saved?.hash === record.hash && saved.owner === record.owner;
 }

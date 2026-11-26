@@ -11,7 +11,7 @@ test("the Agent reference includes each public REST operation and MCP tool", asy
   const expected = new Set();
   for (const file of await readdir(api, { recursive: true })) {
     if (!file.endsWith(".js")) continue;
-    const path = "/" + file.replace(/\/index\.js$|\.js$/g, "").replace(/\[([^\]]+)\]/g, "{$1}");
+    const path = "/" + file.replace("[[member]]", "{group}/{code}").replace(/\/index\.js$|\.js$/g, "").replace(/\[([^\]]+)\]/g, "{$1}");
     const handlers = await import(new URL(file, api));
     for (const method of ["Get", "Post", "Patch", "Delete"]) {
       if (handlers["onRequest" + method]) expected.add(method.toLowerCase() + " " + path);

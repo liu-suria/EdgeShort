@@ -24,12 +24,12 @@ const isObject = value => value !== null && typeof value === "object" && !Array.
 
 // Validate the advertised input schema before passing data to the shared business handlers.
 function validArguments({ properties, required }, args) {
-  if (!isObject(args) || required.some(key => !Object.hasOwn(args, key))) return false;
+  if (!isObject(args) || required.some(key => !Object.prototype.hasOwnProperty.call(args, key))) return false;
   return Object.entries(args).every(([key, value]) => {
-    if (!Object.hasOwn(properties, key)) return false;
+    if (!Object.prototype.hasOwnProperty.call(properties, key)) return false;
     const rule = properties[key];
     const type = value === null ? "null" : Number.isInteger(value) ? "integer" : typeof value;
-    return [rule.type].flat().includes(type) && (!rule.enum || rule.enum.includes(value))
+    return (Array.isArray(rule.type) ? rule.type.includes(type) : rule.type === type) && (!rule.enum || rule.enum.includes(value))
       && (rule.minLength === undefined || value.length >= rule.minLength)
       && (rule.minimum === undefined || value >= rule.minimum) && (rule.maximum === undefined || value <= rule.maximum);
   });
@@ -45,17 +45,17 @@ export async function callTool(context, identity, name, args) {
   const links = linkHandlers(authorised, json, { defaultLimit: 100 });
   const groups = groupHandlers(authorised, json);
   const endpoint = new URL(context.request.url);
-  function invoke(handler, method, params = {}, body) {
-    const request = new Request(endpoint.href, { method, body: body === undefined ? undefined : JSON.stringify(body) });
+  function invoke(handler, method, params = {}, body, query = "") {
+    const request = new Request(endpoint.origin + "/api/mcp" + query, { method, body: body === undefined ? undefined : JSON.stringify(body) });
     return handler({ ...context, request, params });
   }
-  endpoint.search = "";
   switch (name) {
     case "list_groups":
       return invoke(groups.list, "GET");
-    case "list_links":
-      endpoint.search = new URLSearchParams(args).toString();
-      return invoke(links.list, "GET");
+    case "list_links": {
+      const query = Object.entries(args).map(([key, value]) => encodeURIComponent(key) + "=" + encodeURIComponent(String(value))).join("&");
+      return invoke(links.list, "GET", {}, undefined, query ? "?" + query : "");
+    }
     case "create_link":
       return invoke(links.create, "POST", {}, args);
     case "update_link": {

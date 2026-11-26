@@ -26,14 +26,15 @@ async function loadRoutes(directory) {
     const names = [];
     const pattern = parts.map(part => {
       if (!part.startsWith("[")) return part;
+      if (part.startsWith("[[")) { names.push(part.slice(2,-2)); return "(.+)"; }
       names.push(part.slice(1, -1));
       return "([^/]+)";
     }).join("/");
-    return { regex: new RegExp("^/" + pattern + "/?$"), names, module: await import(new URL(file, handlers)) };
+    return { regex: new RegExp("^/" + pattern + "/?$"), names, catchAll: file.includes("[["), module: await import(new URL(file, handlers)) };
   }));
 }
 const routes = (await Promise.all(["edge-functions", "cloud-functions"].map(loadRoutes))).flat();
-routes.sort((a, b) => a.names.length - b.names.length);
+routes.sort((a, b) => Number(a.catchAll) - Number(b.catchAll) || a.names.length - b.names.length);
 
 const staticFiles = new Set(["index.html", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "admin/index.html", "admin/app.js", "admin/style.css", "admin/qrcode.min.js", "admin/agent-guide.md", "admin/openapi.json", "connector/edgeshort.mjs"]);
 const types = { md: "text/plain; charset=utf-8", json: "application/json; charset=utf-8", html: "text/html; charset=utf-8", css: "text/css", js: "text/javascript", mjs: "text/javascript", ico: "image/x-icon", svg: "image/svg+xml", png: "image/png" };

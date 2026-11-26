@@ -76,13 +76,17 @@
         : t("requestFailed", { status: response.status });
       const error = new Error(data?.error || fallback);
       error.status = response.status;
+      error.details = data?.details;
       if (state.user && [401, 403].includes(response.status) && path !== "/api/auth/session") refreshIdentity();
       throw error;
     }
     return data;
   }
   function setLoading(loading) { el.loading.hidden = !loading; if (loading) { el.empty.hidden = true; el.noMatch.hidden = true; el.tableWrap.hidden = true; } }
-  let pageHistory = [""], nextCursor = null, listRequest = 0;
+  const pageSize = 20;
+  let pageHistory = [""], nextCursor = null, listRequest = 0, displayedQuery = null;
+  const pageKey = () => JSON.stringify([state.groupFilter, el.search.value.trim(), pageHistory.at(-1)]);
+  function completePage() { return displayedQuery === pageKey() && pageHistory.length === 1 && !nextCursor; }
   function resetPages() { pageHistory = [""]; nextCursor = null; }
   function addressRows(resource, path) {
     const platform = resource.platformUrl || shortUrl(path);
@@ -129,9 +133,19 @@
       return `<tr><td class="code-cell">${addressRows(link, link.path)}${remark}</td><td class="destination-cell"><a class="destination" title="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" href="${escapeHtml(link.url)}">${escapeHtml(link.url)}</a></td><td class="number" data-label="${t("visits")}">${formatNumber(link.visits)}</td><td class="expiry-cell" data-label="${t("expiresAt")}">${expiry}</td><td class="date-cell" data-label="${t("updated")}"><span class="date">${formatDate(link.updatedAt)}</span></td><td><div class="row-actions">${defaultAction}<button class="row-action" type="button" data-edit="${escapeHtml(link.path)}">${t("edit")}</button><button class="row-action delete" type="button" data-delete="${escapeHtml(link.path)}">${t("delete")}</button></div></td></tr>`;
     }).join("");
   }
+  function comparePageOrder(left, right) {
+    if (state.user.role !== "admin" && left.group !== right.group) return left.group < right.group ? -1 : 1;
+    const a = left.path.replace("/", "~") + ".json", b = right.path.replace("/", "~") + ".json";
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+  function displayPage(data) {
+    nextCursor = data.nextCursor; displayedQuery = pageKey();
+    state.links = data.links; state.groups = data.groups;
+    renderGroups(); renderLinks();
+  }
   async function loadLinks() {
     const seq = ++listRequest;
-    const query = new URLSearchParams({ limit: "20" });
+    const query = new URLSearchParams({ limit: String(pageSize) });
     if (pageHistory.at(-1)) query.set("cursor", pageHistory.at(-1));
     if (state.groupFilter !== "*") query.set("group", state.groupFilter);
     if (el.search.value.trim()) query.set("q", el.search.value.trim());
@@ -140,18 +154,18 @@
     try {
       const data = await request("/api/links?" + query);
       if (state.user !== user || seq !== listRequest) return;
-      nextCursor = data.nextCursor;
-      state.links = data.links; state.groups = data.groups; renderGroups(); renderLinks();
+      displayPage(data);
     } catch (error) {
       if (state.user !== user || seq !== listRequest) return;
       if (error.status === 401) return showLogin();
-      showToast(error.message); state.links = []; state.groups = []; renderGroups(); renderLinks();
+      showToast(error.message);
+      displayedQuery = null; state.links = []; state.groups = []; renderGroups(); renderLinks();
     } finally { if (state.user === user && seq === listRequest) setLoading(false); }
   }
   function clearPrivateView() {
     document.querySelectorAll("dialog[open]").forEach(dialog => dialog.close());
     state.links = []; state.groups = []; state.apiKeys = []; state.accounts = [];
-    listRequest++; resetPages(); state.editing = null; state.groupFilter = "*";
+    displayedQuery = null; listRequest++; resetPages(); state.editing = null; state.groupFilter = "*";
     el.apiKeyValue.value = ""; el.apiKeyResult.hidden = true; el.apiKeysList.replaceChildren();
     $("#managed-user").replaceChildren(); $("#account-groups").replaceChildren(); $("#users-form").reset();
     el.search.value = ""; el.linkForm.reset(); renderGroups(); renderLinks();
@@ -167,7 +181,7 @@
     setTimeout(() => el.password.focus(), 0);
   }
   let openPairOnLogin = new URLSearchParams(location.search).get("connect") === "device";
-  function showDashboard(user) {
+  function showDashboard(user, page) {
     $("#setup-view").hidden = true;
     state.user = user ?? { username: "admin", role: "admin" };
     clearPrivateView();
@@ -179,7 +193,7 @@
     el.loginView.hidden = true;
     el.dashboard.hidden = false;
     el.signOut.hidden = false;
-    loadLinks();
+    if (page) { displayPage(page); setLoading(false); } else loadLinks();
     if(openPairOnLogin){openPairOnLogin=false;openApiDialog();}
   }
   async function refreshIdentity() {
@@ -480,9 +494,7 @@
     $("#unbind-domain").hidden = !(admin && active);
   }
   $("#group-domain").addEventListener("click", async () => {
-    if (state.user?.role !== "admin") return;
-    await loadLinks();
-    if (!state.groups.some(group => group.name === state.groupFilter)) return;
+    if (state.user?.role !== "admin" || !state.groups.some(group => group.name === state.groupFilter)) return;
     $("#domain-form").reset(); $("#domain-error").textContent = ""; renderDomain(); $("#domain-dialog").showModal();
   });
   $("#close-domain").addEventListener("click", () => $("#domain-dialog").close());
@@ -518,14 +530,25 @@
   $("#group-form").addEventListener("submit", async event => {
     event.preventDefault();
     const name = $("#group-name").value;
-    let existing;
-    try { existing = (await request("/api/links/" + encodeURIComponent(name))).link; }
-    catch (error) { if (error.status !== 404) { $("#group-error").textContent = error.message; return; } }
-    if (existing && !confirm(t("confirmUpgrade", { name }) + "\n" + existing.url)) return;
+    const button = event.currentTarget.querySelector("button[type=submit]");
+    button.disabled = true;
+    const create = body => request("/api/groups", { method: "POST", body: JSON.stringify(body) });
     try {
-      await request("/api/groups", { method: "POST", body: JSON.stringify({ name, upgradeRoot: Boolean(existing) }) });
-      state.groupFilter = name; resetPages(); $("#group-dialog").close(); await loadLinks();
+      let data;
+      try { data = await create({ name }); }
+      catch (error) {
+        if (error.status !== 409 || error.details?.reason !== "root_exists") throw error;
+        if (!confirm(t("confirmUpgrade", { name }) + "\n" + error.details.url)) return;
+        data = await create({ name, upgradeRoot: true, expectedRoot: error.details });
+      }
+      listRequest++; resetPages();
+      state.groups = [...state.groups.filter(group => group.name !== name), data.group].sort((a,b) => a.name.localeCompare(b.name));
+      state.groupFilter = name; state.links = []; el.search.value = ""; displayedQuery = pageKey();
+      $("#group-dialog").close(); renderGroups(); renderLinks(); setLoading(false);
+      // A freshly created group is empty; upgrades already have a home member.
+      if (data.group.defaultCode) loadLinks();
     } catch (error) { $("#group-error").textContent = error.message; }
+    finally { button.disabled = false; }
   });
   function renderAccountForm() {
     const name = $("#managed-user").value;
@@ -592,8 +615,8 @@
     try {
       await request("/api/auth/setup", { method: "POST", body: JSON.stringify({ username, password, setupCode: $("#setup-proof").value.trim() }) });
       $("#setup-form").reset(); $("#username").value = username;
-      const session = await request("/api/auth/session");
-      if (session.authenticated) showDashboard(session.user);
+      const session = await request("/api/auth/session?dashboard=1");
+      if (session.authenticated) showDashboard(session.user, session.page);
       else showLogin(t("sessionMissing"));
     } catch (error) {
       if (error.status === 409 && !(await request("/api/auth/session")).needsSetup) showLogin(error.message);
@@ -606,12 +629,12 @@
       await request("/api/auth/login", { method: "POST", body: JSON.stringify({ username: $("#username").value.trim(), password: el.password.value }) });
       el.password.value = "";
       sessionStorage.setItem("edgeshort:pending-login", "1");
-      const session = await request("/api/auth/session");
+      const session = await request("/api/auth/session?dashboard=1");
       if (!session.authenticated) throw new Error(t("sessionMissing"));
       // This is a single-page admin. Keeping the successful session in the same
       // document avoids an unnecessary second authentication check during navigation.
       window.history.replaceState(null, "", "/admin/?view=links");
-      showDashboard(session.user);
+      showDashboard(session.user, session.page);
     }
     catch (error) { el.loginError.textContent = error.message; } finally { button.disabled = false; }
   });
@@ -632,9 +655,35 @@
     const path = state.editing ? `/api/links/${state.editing.path.split("/").map(encodeURIComponent).join("/")}` : "/api/links";
     try {
       const editing = state.editing;
+      if (editing) {
+        if (body.code === editing.code) delete body.code;
+        if (body.group === editing.group) delete body.group;
+        if (body.url === editing.url) delete body.url;
+        if (body.title === editing.title) delete body.title;
+        if (!Object.keys(body).length) { closeDialog(); return; }
+      }
       const data = await request(path, { method: editing ? "PATCH" : "POST", body: JSON.stringify(body) });
-      resetPages(); closeDialog(); await loadLinks(); showToast(editing ? t("updatedToast") : t("created"));
-      if (!editing) copy(data.link.shortUrl);
+      closeDialog();
+      const saved = data.link;
+      const needle = el.search.value.trim().toLowerCase();
+      const visible = (state.groupFilter === "*" || state.groupFilter === saved.group) &&
+        (!needle || [saved.path, saved.title, saved.url].join(" ").toLowerCase().includes(needle));
+      const sameRow = editing && saved.path === editing.path && visible && displayedQuery === pageKey();
+      const remaining = state.links.filter(item => item.path !== editing?.path && item.path !== saved.path);
+      if (sameRow) {
+        listRequest++; setLoading(false);
+        state.links = state.links.map(item => item.path === saved.path ? saved : item);
+        renderLinks();
+      } else if (completePage() && remaining.length + Number(visible) <= pageSize) {
+        listRequest++; setLoading(false);
+        if (visible) remaining.push(saved);
+        state.links = remaining.sort(comparePageOrder);
+        renderLinks();
+      } else {
+        resetPages(); loadLinks();
+      }
+      showToast(editing ? t("updatedToast") : t("created"));
+      if (!editing) copy(saved.shortUrl);
     }
     catch (error) { el.linkError.textContent = error.message; } finally { el.save.disabled = false; }
   });
@@ -666,9 +715,9 @@
   (async () => {
     const pendingLogin = sessionStorage.getItem("edgeshort:pending-login") === "1";
     try {
-      const data = await request("/api/auth/session");
+      const data = await request("/api/auth/session?dashboard=1");
       if (data.needsSetup) return showSetup(data.needsProof);
-      if (data.authenticated) return showDashboard(data.user);
+      if (data.authenticated) return showDashboard(data.user, data.page);
       showLogin(pendingLogin ? t("sessionMissing") : "");
     } catch {
       showLogin(pendingLogin ? t("sessionUnknown") : "");

@@ -20,25 +20,24 @@ const BAD_CODE = "Short code must be 1–16 letters, numbers, hyphens, or unders
 const SELF_LINK = "The destination cannot be a short link on this site (it would redirect in a loop)";
 const BAD_EXPIRY = "Expiration must be a future date/time or a whole number of days from 1 to 36500";
 
-async function assertNotSelfLink(store, url, host) {
+function assertNotSelfLink(domains, url, host) {
   const target = new URL(url);
   if (isPlatformRoute(target, host)) throw new HttpError(422, SELF_LINK);
-  const domains = await domainRegistry(store);
   if (domains.some(row => row.status === "active" && isBrandRoute(target, row.hostname))) {
     throw new HttpError(422, SELF_LINK);
   }
 }
 
-async function linkResult(store, record, origin) {
+function linkResult(record, domains, origin) {
   const link = publicRecord(record, origin);
-  return { link: link.group ? publishedLink(link, await domainRegistry(store), origin) : link };
+  return { link: link.group ? publishedLink(link, domains, origin) : link };
 }
 
 export async function getLink(store, code, origin = "") {
   const record = await getRecord(store, code);
   if (!record?.url) throw new HttpError(404, "Link not found");
-  const visits = await getVisitInfo(store, record);
-  return linkResult(store, { ...record, visits: (Number(record.visits) || 0) + visits.count, lastVisitAt: visits.at }, origin);
+  const [visits, domains] = await Promise.all([getVisitInfo(store, record), record.code.includes("/") ? domainRegistry(store) : []]);
+  return linkResult({ ...record, visits: (Number(record.visits) || 0) + visits.count, lastVisitAt: visits.at }, domains, origin);
 }
 
 async function selectedGroup(store, group) {
@@ -53,10 +52,10 @@ async function selectedGroup(store, group) {
 export async function createLink(store, body, ctx = {}) {
   const url = normaliseUrl(body.url);
   if (!url) throw new HttpError(422, BAD_URL);
-  await assertNotSelfLink(store, url, ctx.host);
   const expiresAt = normaliseExpiry(body.expiresAt);
   if (expiresAt === undefined) throw new HttpError(422, BAD_EXPIRY);
-  const group = await selectedGroup(store, body.group);
+  const [domains, group] = await Promise.all([domainRegistry(store), selectedGroup(store, body.group)]);
+  assertNotSelfLink(domains, url, ctx.host);
   const requested = body.code ? normaliseCode(body.code) : null;
   if (body.code && !requested) throw new HttpError(422, BAD_CODE);
   const now = new Date().toISOString();
@@ -66,13 +65,13 @@ export async function createLink(store, body, ctx = {}) {
     const link = build(requested);
     if (!(await saveNewRecord(store, link))) throw new HttpError(409, "That short code is already in use");
     await Promise.all([clearStaleCounter(link.code), invalidate(link.code, ctx.origin)]);
-    return linkResult(store, { ...link, visits: 0 }, ctx.origin);
+    return linkResult({ ...link, visits: 0 }, domains, ctx.origin);
   }
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const link = build(makeCode());
     if (await saveNewRecord(store, link)) {
       await Promise.all([clearStaleCounter(link.code), invalidate(link.code, ctx.origin)]);
-      return linkResult(store, { ...link, visits: 0 }, ctx.origin);
+      return linkResult({ ...link, visits: 0 }, domains, ctx.origin);
     }
   }
   throw new HttpError(503, "Could not allocate a short code. Please try again.");
@@ -80,15 +79,18 @@ export async function createLink(store, body, ctx = {}) {
 
 // PATCH semantics: only the fields present in the body change.
 export async function updateLink(store, code, body, ctx = {}) {
-  const existing = await getRecord(store, code);
+  const current = splitLinkPath(code);
+  const [existing, domains, group] = await Promise.all([
+    getRecord(store, code),
+    body.url !== undefined || body.group || current.group ? domainRegistry(store) : [],
+    body.group === undefined || body.group === current.group ? current.group : selectedGroup(store, body.group),
+  ]);
   if (!existing?.url) throw new HttpError(404, "Link not found");
   const url = body.url === undefined ? existing.url : normaliseUrl(body.url);
   if (!url) throw new HttpError(422, BAD_URL);
-  if (body.url !== undefined) await assertNotSelfLink(store, url, ctx.host);
-  const current = splitLinkPath(existing.code);
+  if (body.url !== undefined) assertNotSelfLink(domains, url, ctx.host);
   const shortCode = body.code === undefined ? current.code : normaliseCode(body.code);
   if (!shortCode) throw new HttpError(422, BAD_CODE);
-  const group = body.group === undefined ? current.group : await selectedGroup(store, body.group);
   const nextCode = linkPath(group, shortCode);
   const expiresAt = body.expiresAt === undefined ? (existing.expiresAt || null) : normaliseExpiry(body.expiresAt);
   if (expiresAt === undefined) throw new HttpError(422, BAD_EXPIRY);
@@ -96,26 +98,34 @@ export async function updateLink(store, code, body, ctx = {}) {
   const link = { ...existing, id: visitId(existing), code: nextCode, url, title, expiresAt, updatedAt: new Date().toISOString() };
   if (nextCode !== existing.code) await guardDefault(store, existing.code);
   if (nextCode === existing.code) {
-    await saveRecord(store, link);
-  } else {
-    // Blob keys are based on the short code. Create the new key first so a
-    // failed rename never removes the existing short link, then carry the
-    // visit counter over to the new code.
-    // A previous attempt may have created the target and then failed. Resume it
-    // (same record id) instead of reporting a conflict, and apply this request's fields.
-    const target = await getRecord(store, nextCode);
-    if (target && visitId(target) === link.id) await saveRecord(store, link);
-    else if (!(await saveNewRecord(store, link))) throw new HttpError(409, "That short code is already in use");
-    const moved = Math.max(await getVisits(store, existing.code), await getVisits(store, nextCode));
-    if (moved) await setVisits(store, nextCode, moved);
-    await store.delete(recordKey(existing.code));
-    await store.delete(visitsKey(existing.code));
-    await invalidate(existing.code, ctx.origin);
+    // Hold the mutation lock until the write settles, even if the independent
+    // counter read fails first. An acknowledged write must invalidate its cache.
+    const [write, counts] = await Promise.allSettled([saveRecord(store, link), getVisitInfo(store, link)]);
+    if (write.status === "rejected") throw write.reason;
+    if (url !== existing.url || expiresAt !== (existing.expiresAt || null)) {
+      await Promise.all([invalidate(nextCode, ctx.origin), group && invalidate(group, ctx.origin)]);
+    }
+    if (counts.status === "rejected") throw counts.reason;
+    const visits = counts.value;
+    return linkResult({ ...link, visits: (Number(link.visits) || 0) + visits.count, lastVisitAt: visits.at }, domains, ctx.origin);
   }
-  await invalidate(nextCode, ctx.origin);
-  if (group) await invalidate(group, ctx.origin);
-  const visits = await getVisitInfo(store, link);
-  return linkResult(store, { ...link, visits: (Number(link.visits) || 0) + visits.count, lastVisitAt: visits.at }, ctx.origin);
+  // Blob keys are based on the short code. Create the new key first so a
+  // failed rename never removes the existing short link, then carry the
+  // visit counter over to the new code.
+  // A previous attempt may have created the target and then failed. Resume it
+  // (same record id) instead of reporting a conflict, and apply this request's fields.
+  const target = await getRecord(store, nextCode);
+  if (target && visitId(target) === link.id) await saveRecord(store, link);
+  else if (!(await saveNewRecord(store, link))) throw new HttpError(409, "That short code is already in use");
+  const moved = Math.max(...await Promise.all([getVisits(store, existing.code), getVisits(store, nextCode)]));
+  if (moved) await setVisits(store, nextCode, moved);
+  await store.delete(recordKey(existing.code));
+  await store.delete(visitsKey(existing.code));
+  await invalidate(existing.code, ctx.origin);
+  const [visits] = await Promise.all([
+    getVisitInfo(store, link), invalidate(nextCode, ctx.origin), group && invalidate(group, ctx.origin),
+  ]);
+  return linkResult({ ...link, visits: (Number(link.visits) || 0) + visits.count, lastVisitAt: visits.at }, domains, ctx.origin);
 }
 
 async function guardDefault(store, path) {

@@ -19,7 +19,13 @@ export async function createGroup(store, body, origin) {
     if (upgradeRoot && current.upgradedFrom) return publicGroup(current, origin);
     throw new HttpError(409, "Group already exists");
   }
-  if (current && !upgradeRoot) throw new HttpError(409, "Root short link already uses this path");
+  if (current && !upgradeRoot) throw new HttpError(409, "Root short link already uses this path", {
+    reason: "root_exists", url: current.url, id: current.id ?? null, updatedAt: current.updatedAt ?? null,
+  });
+  if (current && body.expectedRoot && (body.expectedRoot.id !== (current.id ?? null) ||
+      body.expectedRoot.updatedAt !== (current.updatedAt ?? null) || body.expectedRoot.url !== current.url)) {
+    throw new HttpError(409, "根短链已被修改，请重新确认");
+  }
   if (!current && upgradeRoot) throw new HttpError(404, "Root short link not found");
   const group = { kind: "group", code: name, id: makeRecordId(), defaultCode: null, expiresAt: groupExpiry(body.expiresAt) };
   // Index first. Readers verify the authoritative root so an interrupted create
@@ -87,8 +93,12 @@ export function groupHandlers(authorise, respond) {
       const group = publicGroup(await requireGroup(store, name), origin);
       return respond({ group: publishedGroup(group, await domainRegistry(store), origin, user.role === "admin") });
     }),
-    create: handle(async (store, origin, _, body) => withRouteLocks(store, [body.name], async () =>
-      respond({ group: await createGroup(store, body, origin) }, 201))),
+    create: handle(async (store, origin, _, body) => {
+      const create = async () => respond({ group: await createGroup(store, body, origin) }, 201);
+      // An ordinary create only publishes a new root via an atomic create-if-absent.
+      // Converting an existing root moves data across keys and needs the route lock.
+      return body.upgradeRoot ? withRouteLocks(store, [body.name], create) : create();
+    }),
     update: handle(async (store, origin, name, body, user) => withRouteLocks(store, [name], async () =>
       respond({ group: publishedGroup(await updateGroup(store, name, body, origin), await domainRegistry(store), origin, user.role === "admin") }))),
   };

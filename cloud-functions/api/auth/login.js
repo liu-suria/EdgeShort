@@ -11,9 +11,8 @@ export async function onRequestPost(context) {
   try {
     const { username = "admin", password } = await readJson(context.request);
     const store = getLinkStore();
-    const config = await getInstallation(store);
+    const [config, gate] = await Promise.all([getInstallation(store), loginGate(store, clientIp(context.request))]);
     if (!config) return json({ error: "请先完成首次配置", needsSetup: true }, 409);
-    const gate = await loginGate(store, clientIp(context.request));
     if (!gate.allowed) {
       return json({ error: "Too many failed attempts. Please try again later." }, 429, { "Retry-After": String(gate.retryAfter) });
     }
