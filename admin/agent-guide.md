@@ -4,7 +4,7 @@
 
 ## 准备凭据
 
-登录后台 →「API 调用」→ 生成 API Key。将完整 Key 放进 Agent 的凭据管理器或调用进程的 `EDGESHORT_KEY` 环境变量。示例从这个变量读取。每次调用都会检查账号当前的分组授权。用 `list_groups` 或 `GET /api/v1/groups` 获取可选组；空列表表示尚未获授权。根路径和建组由管理员管理。
+登录后台 →「连接 Agent」→ 生成 API Key。将完整 Key 放进 Agent 的凭据管理器或调用进程的 `EDGESHORT_KEY` 环境变量。示例从这个变量读取。每次调用都会检查账号当前的分组授权。用 `list_groups` 或 `GET /api/v1/groups` 获取可选组；空列表表示尚未获授权。根路径和建组由管理员管理。
 
 ## MCP 接入
 

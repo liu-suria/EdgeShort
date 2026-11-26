@@ -21,9 +21,9 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 ## API
 
-后台「API 调用 → Agent 接入」提供按当前站点和授权组生成的调用示例。接入 Agent 可直接使用[接口指南与 Python 样例](admin/agent-guide.md)和[OpenAPI 3.1 描述](admin/openapi.json)。
+后台「连接 Agent → 开发者文档」提供按当前站点和授权组生成的调用示例。接入 Agent 可直接使用[接口指南与 Python 样例](admin/agent-guide.md)和[OpenAPI 3.1 描述](admin/openapi.json)。
 
-Open **API 调用** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
+Open **连接 Agent** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
 
 Use the key in `Authorization: Bearer ...` (or `X-API-Key`). The API returns JSON and permits browser calls with CORS enabled.
 
@@ -52,7 +52,7 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
 
 ### MCP 客户端接入
 
-在后台「API 调用」复制 MCP 地址并生成自己的 API Key。客户端选择 **Streamable HTTP**，在请求头传入 `Authorization: Bearer <API Key>`。本地演示端点为 `http://127.0.0.1:4186/api/mcp`。服务按请求验证 Key 和当前组授权，采用无状态 JSON 响应。
+在后台「连接 Agent」复制 MCP 地址并生成自己的 API Key。客户端选择 **Streamable HTTP**，在请求头传入 `Authorization: Bearer <API Key>`。本地演示端点为 `http://127.0.0.1:4186/api/mcp`。服务按请求验证 Key 和当前组授权，采用无状态 JSON 响应。
 
 | 工具 | 参数示例 |
 |---|---|

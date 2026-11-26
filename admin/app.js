@@ -1,7 +1,7 @@
 (() => {
   const translations = {
     zh: {
-      agentGuide: "Agent 接入", agentAuth: "将下方生成的 Key 配入 Agent 的 Bearer 凭据。终端示例从 EDGESHORT_KEY 读取。", guideLink: "接口文档与 Python 示例", agentNotes: "给 Agent 的接入说明", curlList: "curl · 查看分组", curlCreate: "curl · 创建短链", mcpCall: "MCP · 发现并调用工具", exampleCopied: "示例已复制",
+      endpointTitle: "MCP 地址", connectionHelp: "在 Agent 中选择 Streamable HTTP，用下方生成的 API Key 作为 Bearer 凭据。", testPromptLabel: "测试指令", testPrompt: "列出我能管理的分组。", developerDocs: "开发者文档", textCopied: "已复制", agentAuth: "终端示例从 EDGESHORT_KEY 环境变量读取 API Key。", guideLink: "接口文档与 Python 示例", agentNotes: "给 Agent 的接入说明", curlList: "curl · 查看分组", curlCreate: "curl · 创建短链", mcpCall: "MCP · 发现并调用工具", exampleCopied: "示例已复制",
       pageLinks: "本页链接", pageVisits: "本页访问", prevPage: "上一页", nextPage: "下一页", pageNumber: "第 {n} 页",
       firstSetup: "首次配置", setupHint: "创建站点管理员，用于管理短链、用户和域名。", confirmPassword: "确认密码", setupCode: "首次设置码", proofHelp: "在 Makers 控制台的私有 Blob 中打开 edgeshort-links → setup，复制文件名（去掉 .json）。", createAdmin: "创建管理员", mismatch: "两次输入的密码不一致",
       brandAddress: "品牌", platformAddress: "平台", groupEntry: "组入口", domainName: "主域名", primaryDomain: "配置主域名", applyDomain: "保存并启用", unbindDomain: "解绑", rejectDomain: "驳回", approveDomain: "确认启用", pendingDomain: "待确认", activeDomain: "当前入口", reviewDomain: "管理员核实域名归属、CNAME 和 HTTPS 后启用。", localDomain: "本地演示：使用测试域名模拟接入，不查询 DNS 或签发证书。", confirmDomain: "确认对 {host} 执行「{action}」？",
@@ -11,11 +11,11 @@
       adminConsole: "链接管理", privateAdmin: "私有管理后台", welcomeBack: "欢迎回来", signInDescription: "登录后管理你的短链接。", password: "密码", show: "显示", hide: "隐藏", signIn: "登录", signOut: "退出登录",
       yourLinks: "你的短链接", shortLinksTitle: "所有短链接，尽在一处。", shortLinksDescription: "创建、管理和追踪每一条链接。", storageReady: "存储已就绪", newLink: "新建链接", totalLinks: "链接总数", totalVisits: "访问总数", allLinks: "全部链接", loading: "加载中…", loadingLinks: "正在加载链接", searchLinks: "搜索链接", noLinks: "还没有链接", noLinksDescription: "新建第一条短链接，它会显示在这里。", noMatches: "没有匹配的链接", noMatchesDescription: "换个关键词试试。", remark: "备注", destination: "目标地址", visits: "访问", updated: "更新时间", actions: "操作",
       destinationUrl: "目标链接", label: "备注名称", optional: "可选", labelPlaceholder: "例如：夏日活动", customCode: "自定义短码", codeFormat: "1–16 位", codeHelp: "留空将自动生成安全短码。", editCodeHelp: "永久短链改址后，其他节点可能沿用原目标最多 24 小时。", expiresAt: "过期时间", expiresInDays: "有效天数", expiryDaysPlaceholder: "例如：3", days: "天", neverExpires: "永不过期", expiryHelp: "填写 3 表示保存后 3 天到期；留空表示永不过期。", expires: "过期：{date}", cancel: "取消", editLink: "编辑链接", createShortLink: "新建短链接", editShortLink: "编辑短链接", saveChanges: "保存修改", copy: "复制", edit: "编辑", delete: "删除", copied: "短链接已复制", copyFailed: "复制失败，请手动复制链接", deleteConfirm: "确定删除 /{code} 吗？此操作无法撤销。", deleted: "链接已删除", updatedToast: "链接已更新", created: "链接已创建", linkCount: "{count} 条链接", oneLink: "1 条链接",
-      apiAccess: "API 调用", apiTitle: "API 密钥", apiDescription: "使用 API 在自己的工具或自动化中管理短链接。", apiKeyName: "密钥名称", apiKeyNamePlaceholder: "例如：自动化脚本", generateApiKey: "生成 API Key", apiKeyCreated: "请立即保存此 API Key", apiKeyOnce: "为了安全起见，关闭后将无法再次查看完整密钥。", activeApiKeys: "API Keys", apiKeyCount: "{count} 个密钥", apiKeyNone: "还没有 API Key。生成一个用于 API 调用。", apiKeyLastUsed: "最近使用：{date}", apiKeyNeverUsed: "尚未使用", apiKeyRevoked: "已撤销", revoke: "撤销", revokeApiKeyConfirm: "撤销「{name}」？使用此密钥的 API 调用将立即失效。", apiKeyRevokedToast: "API Key 已撤销", apiKeyCopied: "API Key 已复制", apiExample: "调用示例", qrCode: "短链二维码", saveQrCode: "保存二维码", qrCodeFailed: "二维码生成失败，请刷新后重试",
+      apiAccess: "连接 Agent", apiTitle: "API 密钥", apiDescription: "使用 API 在自己的工具或自动化中管理短链接。", apiKeyName: "密钥名称", apiKeyNamePlaceholder: "例如：自动化脚本", generateApiKey: "生成 API Key", apiKeyCreated: "请立即保存此 API Key", apiKeyOnce: "为了安全起见，关闭后将无法再次查看完整密钥。", activeApiKeys: "API Keys", apiKeyCount: "{count} 个密钥", apiKeyNone: "还没有 API Key。生成一个用于 API 调用。", apiKeyLastUsed: "最近使用：{date}", apiKeyNeverUsed: "尚未使用", apiKeyRevoked: "已撤销", revoke: "撤销", revokeApiKeyConfirm: "撤销「{name}」？使用此密钥的 API 调用将立即失效。", apiKeyRevokedToast: "API Key 已撤销", apiKeyCopied: "API Key 已复制", apiExample: "调用示例", qrCode: "短链二维码", saveQrCode: "保存二维码", qrCodeFailed: "二维码生成失败，请刷新后重试",
       sessionMissing: "密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。", sessionUnknown: "无法确认登录状态，请刷新页面后重试。", invalidUrl: "请输入有效的 http:// 或 https:// 目标链接", serverError: "服务器错误（{status}）。请检查最新的 Edge Function 部署和项目密钥。", requestFailed: "请求失败（{status}）",
     },
     en: {
-      agentGuide: "Connect an agent", agentAuth: "Configure the generated key as a Bearer credential. Shell examples read EDGESHORT_KEY.", guideLink: "API guide and Python examples", agentNotes: "Agent instructions", curlList: "curl · List groups", curlCreate: "curl · Create a link", mcpCall: "MCP · Discover and call tools", exampleCopied: "Example copied",
+      endpointTitle: "MCP endpoint", connectionHelp: "Select Streamable HTTP in your agent and use an API key from below as its Bearer credential.", testPromptLabel: "Test prompt", testPrompt: "List the groups I can manage.", developerDocs: "Developer documentation", textCopied: "Copied", agentAuth: "Shell examples read the API key from EDGESHORT_KEY.", guideLink: "API guide and Python examples", agentNotes: "Agent instructions", curlList: "curl · List groups", curlCreate: "curl · Create a link", mcpCall: "MCP · Discover and call tools", exampleCopied: "Example copied",
       pageLinks: "Links on page", pageVisits: "Visits on page", prevPage: "Previous", nextPage: "Next", pageNumber: "Page {n}",
       firstSetup: "Initial setup", setupHint: "Create the site administrator to manage links, users and domains.", confirmPassword: "Confirm password", setupCode: "Setup code", proofHelp: "In the private Makers Blob store edgeshort-links, open setup and copy the file name without .json.", createAdmin: "Create administrator", mismatch: "The passwords do not match",
       brandAddress: "Brand", platformAddress: "Platform", groupEntry: "Group entry", domainName: "Primary domain", primaryDomain: "Configure domain", applyDomain: "Save and activate", unbindDomain: "Unbind", rejectDomain: "Reject", approveDomain: "Activate", pendingDomain: "Pending review", activeDomain: "Current entry", reviewDomain: "An admin activates the domain after verifying ownership, CNAME and HTTPS.", localDomain: "Local preview simulates domain setup without DNS or certificate issuance.", confirmDomain: "Confirm {action} for {host}?",
@@ -25,7 +25,7 @@
       adminConsole: "LINK MANAGEMENT", privateAdmin: "PRIVATE ADMIN", welcomeBack: "Welcome back.", signInDescription: "Sign in to manage your short links.", password: "Password", show: "Show", hide: "Hide", signIn: "Sign in", signOut: "Sign out",
       yourLinks: "YOUR LINKS", shortLinksTitle: "Short links, in one place.", shortLinksDescription: "Create, manage, and track every link.", storageReady: "Storage ready", newLink: "New link", totalLinks: "Total links", totalVisits: "Total visits", allLinks: "All links", loading: "Loading…", loadingLinks: "Loading links", searchLinks: "Search links", noLinks: "No links yet", noLinksDescription: "Create your first short link to see it here.", noMatches: "No matching links", noMatchesDescription: "Try a different keyword.", remark: "Remark", destination: "Destination", visits: "Visits", updated: "Updated", actions: "Actions",
       destinationUrl: "Destination URL", label: "Remark", optional: "optional", labelPlaceholder: "e.g. Summer campaign", customCode: "Custom code", codeFormat: "1–16 characters", codeHelp: "Leave empty to generate a secure short code.", editCodeHelp: "Other nodes may retain an edited permanent destination for up to 24 hours.", expiresAt: "Expiration", expiresInDays: "Valid for", expiryDaysPlaceholder: "e.g. 3", days: "days", neverExpires: "Never expires", expiryHelp: "Enter 3 to expire the link three days after saving. Leave blank to never expire.", expires: "Expires: {date}", cancel: "Cancel", editLink: "EDIT LINK", createShortLink: "Create short link", editShortLink: "Edit short link", saveChanges: "Save changes", copy: "Copy", edit: "Edit", delete: "Delete", copied: "Short link copied", copyFailed: "Copy failed — please copy the link manually", deleteConfirm: "Delete /{code}? This cannot be undone.", deleted: "Link deleted", updatedToast: "Link updated", created: "Link created", linkCount: "{count} links", oneLink: "1 link",
-      apiAccess: "API access", apiTitle: "API keys", apiDescription: "Use the API to manage short links from your own tools or automations.", apiKeyName: "Key name", apiKeyNamePlaceholder: "e.g. Automation script", generateApiKey: "Generate API key", apiKeyCreated: "Save this API key now", apiKeyOnce: "For security, the full key cannot be viewed again after this dialog is closed.", activeApiKeys: "API keys", apiKeyCount: "{count} keys", apiKeyNone: "No API keys yet. Generate one for API access.", apiKeyLastUsed: "Last used: {date}", apiKeyNeverUsed: "Never used", apiKeyRevoked: "Revoked", revoke: "Revoke", revokeApiKeyConfirm: "Revoke “{name}”? API calls using this key will stop immediately.", apiKeyRevokedToast: "API key revoked", apiKeyCopied: "API key copied", apiExample: "Example", qrCode: "Short-link QR code", saveQrCode: "Save QR code", qrCodeFailed: "Unable to generate the QR code. Refresh and try again.",
+      apiAccess: "Connect Agent", apiTitle: "API keys", apiDescription: "Use the API to manage short links from your own tools or automations.", apiKeyName: "Key name", apiKeyNamePlaceholder: "e.g. Automation script", generateApiKey: "Generate API key", apiKeyCreated: "Save this API key now", apiKeyOnce: "For security, the full key cannot be viewed again after this dialog is closed.", activeApiKeys: "API keys", apiKeyCount: "{count} keys", apiKeyNone: "No API keys yet. Generate one for API access.", apiKeyLastUsed: "Last used: {date}", apiKeyNeverUsed: "Never used", apiKeyRevoked: "Revoked", revoke: "Revoke", revokeApiKeyConfirm: "Revoke “{name}”? API calls using this key will stop immediately.", apiKeyRevokedToast: "API key revoked", apiKeyCopied: "API key copied", apiExample: "Example", qrCode: "Short-link QR code", saveQrCode: "Save QR code", qrCodeFailed: "Unable to generate the QR code. Refresh and try again.",
       sessionMissing: "Password accepted, but the browser did not save the session. Allow cookies for this site and try again.", sessionUnknown: "Unable to confirm the sign-in session. Refresh the page and try again.", invalidUrl: "Enter a valid http:// or https:// destination URL", serverError: "Server error ({status}). Check the latest Edge Function deployment and project secrets.", requestFailed: "Request failed ({status})",
     },
   };
@@ -236,10 +236,15 @@
     }
   }
   $("#api-example-kind").addEventListener("change", renderApiExample);
-  $("#copy-example").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(el.apiExample.textContent); showToast(t("exampleCopied")); }
-    catch { showToast(t("copyFailed")); }
-  });
+  function copyPanelText(button, source, message) {
+    $(button).addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText($(source).textContent); showToast(t(message)); }
+      catch { showToast(t("copyFailed")); }
+    });
+  }
+  copyPanelText("#copy-example", "#api-example", "exampleCopied");
+  copyPanelText("#copy-mcp", "#mcp-endpoint", "textCopied");
+  copyPanelText("#copy-prompt", "#agent-test-prompt", "textCopied");
   function renderApiKeys() {
     const keys = state.apiKeys;
     el.apiKeysSummary.textContent = t("apiKeyCount", { count: keys.length });
@@ -255,6 +260,7 @@
     renderApiKeys();
   }
   async function openApiDialog() {
+    $("#developer-docs").open = false;
     el.apiKeyForm.reset(); el.apiKeyResult.hidden = true; el.apiKeyValue.value = "";
     el.apiBaseUrl.textContent = origin() + "/api/v1";
     $("#mcp-endpoint").textContent = origin() + "/api/mcp";

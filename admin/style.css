@@ -163,12 +163,19 @@ dialog::backdrop { background: rgba(58,35,20,.34); backdrop-filter: blur(4px); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 27px; padding-top: 18px; border-top: 1px solid var(--line); }
 .api-dialog-card { max-width: 640px; }
 .api-guide { margin-top: 18px; padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
-.api-guide h3 { margin: 0 0 6px; font-size: 1rem; }
+.agent-connection { margin-top: 15px; }
+.agent-connection h3 { margin: 12px 0 5px; font-size: .83rem; }
+.agent-connection p, .api-guide > p { color: var(--muted); font-size: .81rem; line-height: 1.5; }
+.agent-connection p { margin: 6px 0; }
+.agent-copy-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 8px 3px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: .82rem; }
+.agent-copy-row code { overflow-wrap: anywhere; }
+.api-guide summary { cursor: pointer; font-size: .85rem; font-weight: 650; }
+.api-guide[open] summary { margin-bottom: 9px; }
 .api-doc-links, .api-example-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
 .api-doc-links a { color: var(--accent-ink); font-size: .8rem; }
 .api-example-controls label { margin: 0; }
 .api-example-controls select { max-width: 100%; color: var(--text); background: var(--surface); border: 1px solid var(--line-light); border-radius: 6px; padding: 5px; }
-.api-guide > p { margin-bottom: 13px; color: var(--muted); font-size: .81rem; line-height: 1.5; }
+.api-guide > p { margin-bottom: 13px; }
 .api-endpoint { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
 .api-endpoint span { flex: 0 0 auto; color: var(--mint); font-size: .69rem; font-weight: 800; letter-spacing: .07em; }
 .api-endpoint code { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; }
