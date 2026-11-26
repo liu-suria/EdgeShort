@@ -39,16 +39,6 @@ export function methodNotAllowed() {
   return json({ error: "Method not allowed" }, 405, { Allow: "GET, POST, PATCH, DELETE" });
 }
 
-export function getSecrets(context) {
-  const env = context?.env || {};
-  const adminPassword = env.ADMIN_PASSWORD || globalThis.ADMIN_PASSWORD;
-  const sessionSecret = env.SESSION_SECRET || globalThis.SESSION_SECRET;
-  if (!adminPassword || !sessionSecret) {
-    throw new Error("ADMIN_PASSWORD and SESSION_SECRET must be configured");
-  }
-  return { adminPassword: String(adminPassword), sessionSecret: String(sessionSecret) };
-}
-
 export function parseCookies(request) {
   const header = request.headers.get("Cookie") || "";
   return header.split(";").reduce((cookies, part) => {
@@ -94,22 +84,23 @@ export async function passwordMatches(supplied, expected) {
   return timingSafeEqual(await hashSecret(supplied), await hashSecret(expected));
 }
 
-export async function createSession(sessionSecret) {
+export async function createSession(sessionSecret, username = "admin", version = 1) {
   const issuedAt = Math.floor(Date.now() / 1000);
   const nonce = toBase64Url(crypto.getRandomValues(new Uint8Array(18)));
-  const unsigned = `${issuedAt}.${nonce}`;
-  return `${unsigned}.${await hmac(unsigned, sessionSecret)}`;
+  const unsigned = [issuedAt, nonce, username, version].join(".");
+  return unsigned + "." + await hmac(unsigned, sessionSecret);
 }
 
-export async function isAuthenticated(request, sessionSecret) {
-  const token = parseCookies(request)[COOKIE_NAME];
-  if (!token) return false;
+export async function sessionIdentity(request, sessionSecret) {
+  const token = parseCookies(request)[COOKIE_NAME] || "";
   const parts = token.split(".");
-  if (parts.length !== 3 || !/^\d{10}$/.test(parts[0]) || !/^[A-Za-z0-9_-]{16,}$/.test(parts[1])) return false;
-  const issuedAt = Number(parts[0]);
+  // Existing signed three-part sessions were exclusively issued to the site admin.
+  if (![3, 5].includes(parts.length) || !/^\d{10}$/.test(parts[0]) || !/^[A-Za-z0-9_-]{16,}$/.test(parts[1])) return null;
+  const signature = parts.pop();
+  if (!timingSafeEqual(signature, await hmac(parts.join("."), sessionSecret))) return null;
   const now = Math.floor(Date.now() / 1000);
-  if (issuedAt > now + 60 || now - issuedAt > SESSION_MAX_AGE) return false;
-  return timingSafeEqual(parts[2], await hmac(`${parts[0]}.${parts[1]}`, sessionSecret));
+  if (+parts[0] > now + 60 || now - Number(parts[0]) > SESSION_MAX_AGE) return null;
+  return { username: parts[2] ?? "admin", version: Number(parts[3] ?? 1) };
 }
 
 export function sessionCookie(value) {
@@ -120,20 +111,38 @@ export function clearSessionCookie() {
   return `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
 }
 
-export function requireAuth(context) {
-  let secrets;
-  try {
-    secrets = getSecrets(context);
-  } catch (error) {
-    return { response: json({ error: "Server authentication is not configured" }, 503) };
-  }
-  return isAuthenticated(context.request, secrets.sessionSecret).then((authenticated) => (
-    authenticated ? { secrets } : { response: json({ error: "Unauthorized" }, 401) }
-  ));
-}
-
 export function isCodeShape(input) {
   return typeof input === "string" && CODE_PATTERN.test(input) && !RESERVED_CODES.has(input.toLowerCase());
+}
+
+export function isAccountName(value) {
+  return typeof value === "string" && /^[a-z][a-z0-9_-]*$/.test(value);
+}
+
+export function isGroupName(value) {
+  return isCodeShape(value) && /^[a-z][a-z0-9-]*$/.test(value);
+}
+
+export function linkPath(group, code) {
+  return group ? group + "/" + code : code;
+}
+
+export function splitLinkPath(path) {
+  const parts = path.split("/");
+  return parts.length === 1 ? { group: "", code: parts[0] } : { group: parts[0], code: parts[1] };
+}
+
+export function isLinkPath(path) {
+  if (typeof path !== "string") return false;
+  const parts = path.split("/");
+  return parts.length === 1 ? isCodeShape(parts[0])
+    : parts.length === 2 && isGroupName(parts[0]) && isCodeShape(parts[1]);
+}
+
+// Validate each router parameter separately, including percent-decoded slashes.
+export function routeLinkPath({ group, code } = {}) {
+  if (!isCodeShape(code) || (group !== undefined && !isGroupName(group))) return null;
+  return linkPath(group, code);
 }
 
 export function clientIp(request) {
@@ -181,11 +190,22 @@ export function normaliseExpiry(input) {
   return new Date(time).toISOString();
 }
 
+function platformAddress(origin, path) {
+  const platform = origin === "https://667989.xyz" ? "https://vyu.cc" : origin;
+  const platformUrl = platform + "/" + path;
+  return { platformUrl, brandUrl: null, shortUrl: platformUrl };
+}
+
+export function publicGroup(record, origin) {
+  return { name: record.code, ...platformAddress(origin, record.code), expiresAt: record.expiresAt ?? null, defaultCode: record.defaultCode ?? null };
+}
+
 export function publicRecord(record, origin = "") {
   const expired = Boolean(record.expiresAt) && Date.parse(record.expiresAt) <= Date.now();
   return {
-    code: record.code,
-    shortUrl: `${origin}/${record.code}`,
+    ...splitLinkPath(record.code),
+    path: record.code,
+    ...platformAddress(origin, record.code),
     url: record.url,
     title: record.title || "",
     status: expired ? "expired" : "active",

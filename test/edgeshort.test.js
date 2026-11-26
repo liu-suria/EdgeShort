@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, test } from "node:test";
 import { MemoryStore } from "./memory-store.js";
 import { setStoreFactory } from "../edge-functions/_storage.js";
-import { recordVisit, resetRedirectState } from "../edge-functions/_redirect.js";
+import { resetRedirectState } from "../edge-functions/_redirect.js";
 import { createLink, deleteLink, getLink, listLinks, updateLink } from "../edge-functions/_links.js";
 import { onRequestGet as redirect } from "../edge-functions/[code].js";
 import { onRequestPost as login } from "../edge-functions/api/auth/login.js";
@@ -14,12 +14,16 @@ import { createSession, COOKIE_NAME } from "../edge-functions/_lib.js";
 
 let store;
 const env = { ADMIN_PASSWORD: "correct horse", SESSION_SECRET: "s".repeat(40) };
-const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
 
-beforeEach(() => {
+
+const { derive } = await import("../edge-functions/_password.js");
+const configuration = { username: "admin", salt: "test-salt", digest: await derive(env.ADMIN_PASSWORD, "test-salt"), sessionSecret: env.SESSION_SECRET };
+
+beforeEach(async () => {
   store = new MemoryStore();
   setStoreFactory(() => store);
   resetRedirectState();
+  await store.setJSON("system/installation.json", configuration);
 });
 
 function request(url, init = {}) {
@@ -56,15 +60,71 @@ describe("redirect", () => {
     assert.equal(store.reads, 0);
   });
 
-  test("visits are coalesced into few writes", async () => {
-    await createLink(store, { url: "https://example.com/a", code: "abc" });
+  test("permanent mappings survive an instance restart and hits still count", async (t) => {
+    const entries = new Map();
+    const edge = {
+      match: async (key) => entries.get(key.url)?.clone(),
+      put: async (key, value) => entries.set(key.url, value),
+      delete: async (key) => entries.delete(key.url),
+    };
+    t.after(() => { delete globalThis.caches; });
+    globalThis.caches = { open: async (name) => {
+      if (name === "edgeshort-root-routing-v2") return undefined;
+      assert.equal(name, "edgeshort-permanent-v2");
+      return edge;
+    } };
+    const origin = "https://x.test";
+    const visit = async (path, code) => {
+      const c = ctx(request(path), { code });
+      const response = await redirect(c);
+      await Promise.all(c.waits);
+      return response;
+    };
+
+    await createLink(store, { code: "abc", url: "https://example.com/first" }, { origin });
+    assert.equal((await visit("/abc?first", "abc")).headers.get("X-EdgeShort-Cache"), "miss");
+    assert.equal(entries.get(origin + "/abc").headers.get("Cache-Control"), "public, max-age=86400");
+    resetRedirectState();
+    const hit = await visit("/abc?second", "abc");
+    assert.equal(hit.status, 302);
+    assert.equal(hit.headers.get("X-EdgeShort-Cache"), "edge");
+    assert.equal(hit.headers.get("Cache-Control"), "no-store");
+    assert.equal(hit.headers.get("Location"), "https://example.com/first");
+    assert.equal((await getLink(store, "abc")).link.visits, 2);
+
+    await updateLink(store, "abc", { code: "next", url: "https://example.com/second" }, { origin });
+    assert.equal((await visit("/abc", "abc")).status, 404);
+    assert.equal((await visit("/next", "next")).headers.get("Location"), "https://example.com/second");
+    await updateLink(store, "next", { expiresAt: 2 }, { origin });
+    assert.equal((await visit("/next", "next")).status, 302);
+    assert.equal(entries.size, 0, "temporary links and errors do not populate the edge cache");
+    await updateLink(store, "next", { expiresAt: "" }, { origin });
+    assert.equal((await visit("/next", "next")).status, 302);
+    await deleteLink(store, "next", { origin });
+    assert.equal(entries.size, 0);
+    assert.equal((await visit("/next", "next")).status, 404);
+  });
+
+  test("cache read and write errors fall back to a valid redirect", async (t) => {
+    const fail = async () => { throw new Error("cache unavailable"); };
+    t.after(() => { delete globalThis.caches; });
+    globalThis.caches = { open: async () => ({ match: fail, put: fail, delete: fail }) };
+    await createLink(store, { code: "abc", url: "https://example.com/a" }, { origin: "https://x.test" });
     const c = ctx(request("/abc"), { code: "abc" });
-    for (let i = 0; i < 50; i += 1) await redirect(ctx(request("/abc"), { code: "abc" }, { waitUntil: c.waitUntil }));
+    const response = await redirect(c);
+    assert.equal(response.status, 302);
+    assert.equal(response.headers.get("Location"), "https://example.com/a");
     await Promise.all(c.waits);
-    store.writes = 0;
-    for (let i = 0; i < 50; i += 1) await redirect(ctx(request("/abc"), { code: "abc" }, { waitUntil: c.waitUntil }));
-    await Promise.all(c.waits);
-    assert.equal(store.writes, 0, "no extra counter writes inside the flush window");
+  });
+
+  test("sequential and overlapping GETs are durable before 302; HEAD is not a visit", async () => {
+    await createLink(store, { url: "https://example.com/a", code: "abc" });
+    const visit = (method = "GET") => redirect(ctx(request("/abc", { method }), { code: "abc" }));
+    for (let i = 0; i < 10; i++) assert.equal((await visit()).status, 302);
+    const concurrent = await Promise.all(Array.from({ length: 20 }, () => visit()));
+    assert.ok(concurrent.every(result => result.status === 302));
+    assert.equal((await visit("HEAD")).status, 302);
+    assert.equal((await getLink(store, "abc")).link.visits, 30);
   });
 
   test("junk paths 404 without touching storage; missing 404; expired 410", async () => {
@@ -103,10 +163,8 @@ describe("redirect", () => {
   });
 
   test("a visit for a link that no longer exists never recreates its counter", async () => {
-    const waits = [];
-    recordVisit(store, "ghost", (p) => waits.push(p));
-    await Promise.all(waits);
-    assert.equal(store.data.has("visits/ghost.json"), false);
+    assert.equal((await redirect(ctx(request("/ghost"), { code: "ghost" }))).status, 404);
+    assert.equal((await store.list({ prefix: "visit-shards/" })).blobs.length, 0);
   });
 });
 

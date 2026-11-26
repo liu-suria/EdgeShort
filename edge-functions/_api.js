@@ -1,3 +1,4 @@
+import { liveIdentity } from "./_accounts.js";
 import { API_KEY_FORMAT, hashSecret, json, timingSafeEqual } from "./_lib.js";
 import { getApiKey, getLinkStore, listApiKeys, usageKey } from "./_storage.js";
 
@@ -56,8 +57,10 @@ export async function requireApiKey(context) {
     const store = getLinkStore();
     const key = await findKey(store, token);
     if (!key) return { response: apiJson({ error: "A valid API key is required" }, 401, { "WWW-Authenticate": "Bearer" }) };
+    const user = await liveIdentity(store, key.owner === undefined ? "admin" : key.owner);
+    if (!user) return { response: apiJson({ error: "Account unavailable" }, 401) };
     touchUsage(store, key.id, context.waitUntil?.bind(context));
-    return { store, key };
+    return { store, key, user };
   } catch (error) {
     console.error("api auth failed", error);
     return { response: apiJson({ error: "API authentication is temporarily unavailable" }, 503) };

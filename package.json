@@ -6,6 +6,7 @@
     "@edgeone/pages-blob": "0.0.14"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:ha": "node test/ha-drill.mjs"
   }
 }
