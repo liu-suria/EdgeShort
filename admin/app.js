@@ -1,6 +1,7 @@
 (() => {
   const translations = {
     zh: {
+      agentGuide: "Agent 接入", agentAuth: "将下方生成的 Key 配入 Agent 的 Bearer 凭据。终端示例从 EDGESHORT_KEY 读取。", guideLink: "接口文档与 Python 示例", agentNotes: "给 Agent 的接入说明", curlList: "curl · 查看分组", curlCreate: "curl · 创建短链", mcpCall: "MCP · 发现并调用工具", exampleCopied: "示例已复制",
       pageLinks: "本页链接", pageVisits: "本页访问", prevPage: "上一页", nextPage: "下一页", pageNumber: "第 {n} 页",
       firstSetup: "首次配置", setupHint: "创建站点管理员，用于管理短链、用户和域名。", confirmPassword: "确认密码", setupCode: "首次设置码", proofHelp: "在 Makers 控制台的私有 Blob 中打开 edgeshort-links → setup，复制文件名（去掉 .json）。", createAdmin: "创建管理员", mismatch: "两次输入的密码不一致",
       brandAddress: "品牌", platformAddress: "平台", groupEntry: "组入口", domainName: "主域名", primaryDomain: "配置主域名", applyDomain: "保存并启用", unbindDomain: "解绑", rejectDomain: "驳回", approveDomain: "确认启用", pendingDomain: "待确认", activeDomain: "当前入口", reviewDomain: "管理员核实域名归属、CNAME 和 HTTPS 后启用。", localDomain: "本地演示：使用测试域名模拟接入，不查询 DNS 或签发证书。", confirmDomain: "确认对 {host} 执行「{action}」？",
@@ -14,6 +15,7 @@
       sessionMissing: "密码验证成功，但浏览器没有保存登录状态。请允许此网站使用 Cookie 后重试。", sessionUnknown: "无法确认登录状态，请刷新页面后重试。", invalidUrl: "请输入有效的 http:// 或 https:// 目标链接", serverError: "服务器错误（{status}）。请检查最新的 Edge Function 部署和项目密钥。", requestFailed: "请求失败（{status}）",
     },
     en: {
+      agentGuide: "Connect an agent", agentAuth: "Configure the generated key as a Bearer credential. Shell examples read EDGESHORT_KEY.", guideLink: "API guide and Python examples", agentNotes: "Agent instructions", curlList: "curl · List groups", curlCreate: "curl · Create a link", mcpCall: "MCP · Discover and call tools", exampleCopied: "Example copied",
       pageLinks: "Links on page", pageVisits: "Visits on page", prevPage: "Previous", nextPage: "Next", pageNumber: "Page {n}",
       firstSetup: "Initial setup", setupHint: "Create the site administrator to manage links, users and domains.", confirmPassword: "Confirm password", setupCode: "Setup code", proofHelp: "In the private Makers Blob store edgeshort-links, open setup and copy the file name without .json.", createAdmin: "Create administrator", mismatch: "The passwords do not match",
       brandAddress: "Brand", platformAddress: "Platform", groupEntry: "Group entry", domainName: "Primary domain", primaryDomain: "Configure domain", applyDomain: "Save and activate", unbindDomain: "Unbind", rejectDomain: "Reject", approveDomain: "Activate", pendingDomain: "Pending review", activeDomain: "Current entry", reviewDomain: "An admin activates the domain after verifying ownership, CNAME and HTTPS.", localDomain: "Local preview simulates domain setup without DNS or certificate issuance.", confirmDomain: "Confirm {action} for {host}?",
@@ -46,7 +48,7 @@
     el.languageToggle.textContent = state.language === "zh" ? "EN" : "中文";
     el.languageToggle.setAttribute("aria-label", state.language === "zh" ? "Switch to English" : "切换至中文");
     if (el.dialog.open) el.codeHelp.textContent = state.editing ? t("editCodeHelp") : t("codeHelp");
-    if (el.apiDialog.open) renderApiKeys();
+    if (el.apiDialog.open) { renderApiKeys(); renderApiExample(); }
     renderGroups();
     renderLinks();
   }
@@ -197,22 +199,47 @@
     el.dialog.showModal(); setTimeout(() => el.url.focus(), 0);
   }
   function closeDialog() { el.dialog.close(); }
-  function apiUrl() { return `${origin()}/api/v1/links`; }
-  function apiExample() {
-    const admin = state.user?.role === "admin";
+  function renderApiExample() {
+    const base = origin() + "/api/v1";
+    const endpoint = origin() + "/api/mcp";
     const group = state.groups.find(item => item.name === state.groupFilter)?.name || state.groups[0]?.name;
-    const lines = ["Authorization: Bearer YOUR_API_KEY", "GET   /api/v1/groups"];
-    if (admin) lines.push('POST  /api/v1/groups  {"name":"campaign"}');
-    if (group) {
-      lines.push(
-        `POST  /api/v1/links  ${JSON.stringify({ group, code: "sale", url: "https://example.com/sale", expiresAt: 7 })}`,
-        `PATCH /api/v1/groups/${group}  {"defaultCode":"sale"}`,
-        `PATCH /api/v1/links/${group}/sale  {"expiresAt":null}`,
-        `GET   /api/v1/links?group=${group}`,
-      );
+    const picker = $("#api-example-kind");
+    const create = picker.querySelector('[value="create"]');
+    create.disabled = !group && state.user?.role !== "admin";
+    if (create.disabled && picker.value === "create") picker.value = "list";
+    const auth = '-H "Authorization: Bearer $EDGESHORT_KEY"';
+    const json = "-H 'Content-Type: application/json'";
+    const command = (url, flags) => ['curl --fail-with-body -sS "' + url + '"', ...flags].join(" \\\n  ");
+    if (picker.value === "list") {
+      el.apiExample.textContent = command(base + "/groups", [auth]);
+    } else if (picker.value === "create") {
+      const body = JSON.stringify({ group: group || "", url: "https://example.com/campaign", title: "Agent demo", expiresAt: 7 });
+      el.apiExample.textContent = command(base + "/links", [auth, json, "-d '" + body + "'"]);
+    } else if (picker.value === "mcp") {
+      const rpc = (method, params, id) => "rpc '" + JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "'";
+      el.apiExample.textContent = [
+        "rpc() {", "  " + command(endpoint, [auth, json, "-H 'Accept: application/json, text/event-stream'", '-H "MCP-Protocol-Version: 2025-11-25"', '-d "$1"']), "}",
+        rpc("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "short-link-agent", version: "1" } }, 1),
+        rpc("notifications/initialized", {}), rpc("tools/list", {}, 2), rpc("tools/call", { name: "list_groups", arguments: {} }, 3),
+      ].join("\n");
+    } else {
+      const lines = state.language === "zh" ? [
+        "通过 Streamable HTTP 连接 " + endpoint + "，Bearer 凭据从密钥管理器读取。",
+        "发现工具后先调用 list_groups，选择已授权的组。创建链接使用 create_link，分享返回的 structuredContent.link.shortUrl。",
+        "需要 REST 时导入 " + origin() + "/admin/openapi.json",
+      ] : [
+        "Connect to " + endpoint + " using Streamable HTTP and a Bearer credential from the secret store.",
+        "Discover tools, call list_groups, then use create_link in an authorized group. Share structuredContent.link.shortUrl.",
+        "For REST tools, import " + origin() + "/admin/openapi.json",
+      ];
+      el.apiExample.textContent = lines.join("\n");
     }
-    return lines.join("\n");
   }
+  $("#api-example-kind").addEventListener("change", renderApiExample);
+  $("#copy-example").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(el.apiExample.textContent); showToast(t("exampleCopied")); }
+    catch { showToast(t("copyFailed")); }
+  });
   function renderApiKeys() {
     const keys = state.apiKeys;
     el.apiKeysSummary.textContent = t("apiKeyCount", { count: keys.length });
@@ -229,9 +256,9 @@
   }
   async function openApiDialog() {
     el.apiKeyForm.reset(); el.apiKeyResult.hidden = true; el.apiKeyValue.value = "";
-    el.apiBaseUrl.textContent = apiUrl();
+    el.apiBaseUrl.textContent = origin() + "/api/v1";
     $("#mcp-endpoint").textContent = origin() + "/api/mcp";
-    el.apiExample.textContent = apiExample();
+    renderApiExample();
     el.apiDialog.showModal();
     try { await loadApiKeys(); } catch (error) { showToast(error.message); }
   }

@@ -35,8 +35,8 @@ async function loadRoutes(directory) {
 const routes = (await Promise.all(["edge-functions", "cloud-functions"].map(loadRoutes))).flat();
 routes.sort((a, b) => a.names.length - b.names.length);
 
-const staticFiles = new Set(["index.html", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "admin/index.html", "admin/app.js", "admin/style.css", "admin/qrcode.min.js"]);
-const types = { html: "text/html; charset=utf-8", css: "text/css", js: "text/javascript", ico: "image/x-icon", svg: "image/svg+xml", png: "image/png" };
+const staticFiles = new Set(["index.html", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "admin/index.html", "admin/app.js", "admin/style.css", "admin/qrcode.min.js", "admin/agent-guide.md", "admin/openapi.json"]);
+const types = { md: "text/plain; charset=utf-8", json: "application/json; charset=utf-8", html: "text/html; charset=utf-8", css: "text/css", js: "text/javascript", ico: "image/x-icon", svg: "image/svg+xml", png: "image/png" };
 
 async function dispatch(req, trustedLocalSetup) {
   const path = new URL(req.url).pathname;

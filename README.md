@@ -21,6 +21,8 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 ## API
 
+后台「API 调用 → Agent 接入」提供按当前站点和授权组生成的调用示例。接入 Agent 可直接使用[接口指南与 Python 样例](admin/agent-guide.md)和[OpenAPI 3.1 描述](admin/openapi.json)。
+
 Open **API 调用** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
 
 Use the key in `Authorization: Bearer ...` (or `X-API-Key`). The API returns JSON and permits browser calls with CORS enabled.

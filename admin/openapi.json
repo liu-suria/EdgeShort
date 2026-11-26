@@ -1,0 +1,962 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EdgeShort 管理 API",
+    "version": "1.0.0",
+    "description": "在后台「API 调用」生成 Key；普通用户只可管理获授权分组。MCP 接入见 Agent 指南。"
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "当前平台域名的 REST API"
+    }
+  ],
+  "security": [
+    {
+      "BearerKey": []
+    },
+    {
+      "HeaderKey": []
+    }
+  ],
+  "paths": {
+    "/groups": {
+      "get": {
+        "operationId": "listGroups",
+        "summary": "列出授权分组",
+        "responses": {
+          "200": {
+            "description": "列出授权分组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupList"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createGroup",
+        "summary": "创建分组（管理员）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewGroup"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "创建分组（管理员）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{name}": {
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,15}$",
+            "description": "已存在且有权限的分组。"
+          },
+          "description": "分组名"
+        }
+      ],
+      "get": {
+        "operationId": "getGroup",
+        "summary": "查看分组",
+        "responses": {
+          "200": {
+            "description": "查看分组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateGroup",
+        "summary": "设置或清空默认成员、调整入口有效期",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "设置或清空默认成员、调整入口有效期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/links": {
+      "get": {
+        "operationId": "listLinks",
+        "summary": "分页查询短链",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "省略为所有已授权范围，空串仅查根路径。"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "模糊匹配路径、备注或目标 URL。"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "expired"
+              ]
+            },
+            "description": "按有效状态筛选。"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            },
+            "description": "单页条数。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "上次返回的 nextCursor，保持原筛选条件。"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "description": "精确总数模式，不能和 cursor 同用。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "分页查询短链",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkList"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createLink",
+        "summary": "创建短链；不传 code 则自动生成",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewLink"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "创建短链；不传 code 则自动生成",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/links/{code}": {
+      "parameters": [
+        {
+          "name": "code",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,16}$",
+            "description": "1–16 位，系统保留短码不可使用。"
+          },
+          "description": "现有短码"
+        }
+      ],
+      "get": {
+        "operationId": "getRootLink",
+        "summary": "查看短链",
+        "responses": {
+          "200": {
+            "description": "查看短链",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateRootLink",
+        "summary": "仅更新传入的字段；跨组移动需两组权限",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "仅更新传入的字段；跨组移动需两组权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRootLink",
+        "summary": "删除短链；请先切换或清空默认项",
+        "responses": {
+          "204": {
+            "description": "删除短链；请先切换或清空默认项"
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/links/{group}/{code}": {
+      "parameters": [
+        {
+          "name": "group",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,15}$",
+            "description": "已存在且有权限的分组。"
+          },
+          "description": "成员所在分组"
+        },
+        {
+          "name": "code",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,16}$",
+            "description": "1–16 位，系统保留短码不可使用。"
+          },
+          "description": "现有短码"
+        }
+      ],
+      "get": {
+        "operationId": "getGroupLink",
+        "summary": "查看短链",
+        "responses": {
+          "200": {
+            "description": "查看短链",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateGroupLink",
+        "summary": "仅更新传入的字段；跨组移动需两组权限",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "仅更新传入的字段；跨组移动需两组权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteGroupLink",
+        "summary": "删除短链；请先切换或清空默认项",
+        "responses": {
+          "204": {
+            "description": "删除短链；请先切换或清空默认项"
+          },
+          "default": {
+            "description": "错误，详见 error 字段和 HTTP 状态码。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerKey": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "HeaderKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "Link": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,16}$",
+            "description": "1–16 位，系统保留短码不可使用。"
+          },
+          "group": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "shortUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "brandUrl": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "platformUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visits": {
+            "type": "integer"
+          },
+          "lastVisitAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "code",
+          "group",
+          "path",
+          "shortUrl",
+          "brandUrl",
+          "platformUrl",
+          "url",
+          "status",
+          "expiresAt",
+          "visits"
+        ]
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,15}$",
+            "description": "已存在且有权限的分组。"
+          },
+          "shortUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "brandUrl": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "platformUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "defaultCode": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "shortUrl",
+          "brandUrl",
+          "platformUrl",
+          "defaultCode",
+          "expiresAt"
+        ]
+      },
+      "LinkResult": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/Link"
+          }
+        },
+        "required": [
+          "link"
+        ]
+      },
+      "GroupResult": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/Group"
+          }
+        },
+        "required": [
+          "group"
+        ]
+      },
+      "GroupList": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            }
+          }
+        },
+        "required": [
+          "groups"
+        ]
+      },
+      "LinkList": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "total": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "links",
+          "limit",
+          "offset",
+          "total",
+          "hasMore",
+          "nextCursor"
+        ]
+      },
+      "NewLink": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "外部 HTTP/HTTPS 目标地址。"
+          },
+          "group": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,15}$",
+                "description": "已存在且有权限的分组。"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  ""
+                ]
+              }
+            ],
+            "description": "组名；空串为根路径，仅管理员。"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,16}$",
+            "description": "1–16 位，系统保留短码不可使用。"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "整数表示从现在起的天数；也可传未来的 ISO 时间，null 或空串表示永久。"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "LinkUpdate": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "外部 HTTP/HTTPS 目标地址。"
+          },
+          "group": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,15}$",
+                "description": "已存在且有权限的分组。"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  ""
+                ]
+              }
+            ],
+            "description": "组名；空串为根路径，仅管理员。"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,16}$",
+            "description": "1–16 位，系统保留短码不可使用。"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "整数表示从现在起的天数；也可传未来的 ISO 时间，null 或空串表示永久。"
+          }
+        }
+      },
+      "NewGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,15}$",
+            "description": "已存在且有权限的分组。"
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "整数表示从现在起的天数；也可传未来的 ISO 时间，null 或空串表示永久。"
+          },
+          "upgradeRoot": {
+            "type": "boolean",
+            "default": false,
+            "description": "显式将同名根短链升级为组入口。"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "GroupUpdate": {
+        "type": "object",
+        "properties": {
+          "defaultCode": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,16}$",
+                "description": "1–16 位，系统保留短码不可使用。"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "enum": [
+                  ""
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "整数表示从现在起的天数；也可传未来的 ISO 时间，null 或空串表示永久。"
+          }
+        },
+        "minProperties": 1
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    }
+  }
+}
