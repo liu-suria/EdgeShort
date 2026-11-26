@@ -1,6 +1,6 @@
-import { createAccount, listAccounts, requireAdmin, requireAuth } from "../../_accounts.js";
-import { errorResponse, json, readJson } from "../../_lib.js";
-import { getLinkStore } from "../../_storage.js";
+import { createAccount, listAccounts, requireAdmin, requireAuth } from "../../../edge-functions/_accounts.js";
+import { errorResponse, json, readJson } from "../../../edge-functions/_lib.js";
+import { getLinkStore } from "../../../edge-functions/_storage.js";
 
 export function adminOnly(run) {
   return async context => {

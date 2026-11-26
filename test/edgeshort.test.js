@@ -5,7 +5,7 @@ import { setStoreFactory } from "../edge-functions/_storage.js";
 import { resetRedirectState } from "../edge-functions/_redirect.js";
 import { createLink, deleteLink, getLink, listLinks, updateLink } from "../edge-functions/_links.js";
 import { onRequestGet as redirect } from "../edge-functions/[code].js";
-import { onRequestPost as login } from "../edge-functions/api/auth/login.js";
+import { onRequestPost as login } from "../cloud-functions/api/auth/login.js";
 import { onRequestPost as createKey } from "../edge-functions/api/api-keys/index.js";
 import { onRequestDelete as revokeKey } from "../edge-functions/api/api-keys/[id].js";
 import { onRequestGet as v1List, onRequestPost as v1Create } from "../edge-functions/api/v1/links/index.js";

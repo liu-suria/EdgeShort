@@ -16,7 +16,7 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 1. Import this repository as a Makers project. It is a plain static project: leave the build command empty and use the repository root as the output directory.
 2. 部署后，从平台主域名打开 `/admin/`。首次配置填写管理员账号与密码。两者均为必填，应用不设字段长度限制；账号须以小写英文字母开头，之后可使用小写字母、数字、下划线或连字符。使用 Makers 时，先打开一次设置页面，再到项目的私有 Blob 命名空间 `edgeshort-links` 查看 `setup/` 目录，将文件名去掉 `.json` 后作为一次性设置码。这一步用来确认配置者持有该项目。
-3. 创建成功后自动登录。服务端使用随机盐派生密码摘要，独立生成 32 字节会话签名密钥，与管理员配置一次性写入私有 Blob。新部署不需要配置环境变量。重启或重新发布须保留同一 Blob 数据。空 Blob 一律进入首次设置，旧的 ADMIN_PASSWORD、SESSION_SECRET 环境变量不会创建管理员。
+3. 创建成功后自动登录。服务端使用随机盐派生密码摘要，独立生成 32 字节会话签名密钥，与管理员配置一次性写入私有 Blob。首次配置、登录和用户管理使用 Node.js Cloud Functions，支持 PBKDF2-SHA256 的 600,000 次迭代。会话验证与访客跳转继续在边缘函数执行。新部署不需要配置环境变量。重启或重新发布须保留同一 Blob 数据。空 Blob 一律进入首次设置，旧的 ADMIN_PASSWORD、SESSION_SECRET 环境变量不会创建管理员。
 4. 平台主域名在 `edge-functions/_domain-names.js` 中显式配置，本项目保留 `vyu.cc` 和 `667989.xyz`。自行部署时将自己的管理域名加入此列表。其他域名仅提供已启用分组的公开跳转。
 
 ## API
@@ -156,13 +156,14 @@ Every link looks like:
 
 ```text
 admin/                    # Plain HTML, CSS, and browser JavaScript
+cloud-functions/api/      # Node.js: initial setup, login and user administration
 edge-functions/
   [code].js               # Public redirect (hot path)
   _redirect.js            # Link cache + coalesced visit counting
   _links.js               # Link logic shared by the admin API and /api/v1
   _storage.js             # Blob keys and reads/writes
   _ratelimit.js           # Login failure limiter
-  api/auth/*              # Password login and session endpoints
+  api/auth/*              # Session check and logout
   api/links/*             # Admin (session) API
   api/v1/links/*          # Public (API key) API
   api/api-keys/*          # API key management

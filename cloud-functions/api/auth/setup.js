@@ -1,6 +1,6 @@
-import { initialize } from "../../_installation.js";
-import { createSession, errorResponse, json, readJson, sessionCookie } from "../../_lib.js";
-import { getLinkStore } from "../../_storage.js";
+import { initialize } from "../../../edge-functions/_installation.js";
+import { createSession, errorResponse, json, readJson, sessionCookie } from "../../../edge-functions/_lib.js";
+import { getLinkStore } from "../../../edge-functions/_storage.js";
 
 export async function onRequestPost(context) {
   try {

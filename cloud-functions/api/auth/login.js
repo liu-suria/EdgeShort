@@ -1,11 +1,11 @@
-import { getInstallation } from "../../_installation.js";
-import { derive } from "../../_password.js";
-import { verifyMember } from "../../_accounts.js";
+import { getInstallation } from "../../../edge-functions/_installation.js";
+import { derive } from "../../../edge-functions/_password.js";
+import { verifyMember } from "../../../edge-functions/_accounts.js";
 import {
   clientIp, createSession, errorResponse, json, timingSafeEqual, readJson, sessionCookie,
-} from "../../_lib.js";
-import { getLinkStore } from "../../_storage.js";
-import { clearLoginFailures, loginGate, recordLoginFailure } from "../../_ratelimit.js";
+} from "../../../edge-functions/_lib.js";
+import { getLinkStore } from "../../../edge-functions/_storage.js";
+import { clearLoginFailures, loginGate, recordLoginFailure } from "../../../edge-functions/_ratelimit.js";
 
 export async function onRequestPost(context) {
   try {

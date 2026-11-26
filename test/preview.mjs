@@ -17,19 +17,22 @@ import { createGroup } from "../edge-functions/_groups.js";
 import { createLink } from "../edge-functions/_links.js";
 
 const root = new URL("../", import.meta.url);
-const handlers = new URL("edge-functions/", root);
-const files = await readdir(handlers, { recursive: true });
-const routes = await Promise.all(files.filter(file => file.endsWith(".js") && !file.startsWith("_")).map(async file => {
-  const parts = file.replace(/\.js$/, "").split("/");
-  if (parts.at(-1) === "index") parts.pop();
-  const names = [];
-  const pattern = parts.map(part => {
-    if (!part.startsWith("[")) return part;
-    names.push(part.slice(1, -1));
-    return "([^/]+)";
-  }).join("/");
-  return { regex: new RegExp("^/" + pattern + "/?$"), names, module: await import(new URL(file, handlers)) };
-}));
+async function loadRoutes(directory) {
+  const handlers = new URL(directory + "/", root);
+  const files = await readdir(handlers, { recursive: true });
+  return Promise.all(files.filter(file => file.endsWith(".js") && !file.startsWith("_")).map(async file => {
+    const parts = file.replace(/\.js$/, "").split("/");
+    if (parts.at(-1) === "index") parts.pop();
+    const names = [];
+    const pattern = parts.map(part => {
+      if (!part.startsWith("[")) return part;
+      names.push(part.slice(1, -1));
+      return "([^/]+)";
+    }).join("/");
+    return { regex: new RegExp("^/" + pattern + "/?$"), names, module: await import(new URL(file, handlers)) };
+  }));
+}
+const routes = (await Promise.all(["edge-functions", "cloud-functions"].map(loadRoutes))).flat();
 routes.sort((a, b) => a.names.length - b.names.length);
 
 const staticFiles = new Set(["index.html", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "admin/index.html", "admin/app.js", "admin/style.css", "admin/qrcode.min.js"]);

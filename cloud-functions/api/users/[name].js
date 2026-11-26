@@ -1,5 +1,5 @@
-import { updateAccount } from "../../_accounts.js";
-import { json, readJson } from "../../_lib.js";
+import { updateAccount } from "../../../edge-functions/_accounts.js";
+import { json, readJson } from "../../../edge-functions/_lib.js";
 import { adminOnly } from "./index.js";
 
 export const onRequestPatch = adminOnly(async (store, context) =>
