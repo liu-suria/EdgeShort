@@ -2,9 +2,20 @@
 
 使用平台管理域名（正式站为 `https://vyu.cc`）。品牌域名用于访客跳转。支持远程 MCP 的 Agent 可直接发现五个工具；支持 OpenAPI 导入的 Agent 可读取同目录的 [openapi.json](./openapi.json)。导入本地文件时，将 REST 服务地址设为平台域名下的 `/api/v1`。
 
-## 准备凭据
+## macOS 设备配对
 
-登录后台 →「连接 Agent」→ 生成 API Key。将完整 Key 放进 Agent 的凭据管理器或调用进程的 `EDGESHORT_KEY` 环境变量。示例从这个变量读取。每次调用都会检查账号当前的分组授权。用 `list_groups` 或 `GET /api/v1/groups` 获取可选组；空列表表示尚未获授权。根路径和建组由管理员管理。
+从「连接 Agent → 首次使用本地连接器」下载单文件连接器。需要 Node.js 20+ 和 macOS 钥匙串。把文件放入固定目录，在该目录执行：
+
+```sh
+node ./edgeshort.mjs pair --origin https://vyu.cc
+codex mcp add edgeshort -- node "$PWD/edgeshort.mjs" serve --origin https://vyu.cc
+```
+
+第一条命令显示 5 分钟有效的短码并等待。登录对应平台并核对设备名称和授权范围后点击「允许连接」，然后运行第二条命令。Agent 可以在聊天中传递显示短码；客户端的私密证明及兑换得到的 Key 应留在本机连接器。用“列出我能管理的分组”验证，在后台「设备与密钥」可随时断开。
+
+## 手动 Bearer 凭据
+
+登录后台 →「连接 Agent」→「手动 API Key 接入」→ 生成 API Key。将完整 Key 放进 Agent 的凭据管理器或调用进程的 `EDGESHORT_KEY` 环境变量。示例从这个变量读取。每次调用都会检查账号当前的分组授权。用 `list_groups` 或 `GET /api/v1/groups` 获取可选组；空列表表示尚未获授权。根路径和建组由管理员管理。
 
 ## MCP 接入
 

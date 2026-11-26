@@ -23,7 +23,7 @@ A private, no-build URL shortener for EdgeOne Makers. It uses Edge Functions and
 
 后台「连接 Agent → 开发者文档」提供按当前站点和授权组生成的调用示例。接入 Agent 可直接使用[接口指南与 Python 样例](admin/agent-guide.md)和[OpenAPI 3.1 描述](admin/openapi.json)。
 
-Open **连接 Agent** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
+Open **连接 Agent → 手动 API Key 接入** in `/admin` to generate an API Key. The full key is shown once only; save it somewhere secure. You can revoke it at any time from the same panel.
 
 Use the key in `Authorization: Bearer ...` (or `X-API-Key`). The API returns JSON and permits browser calls with CORS enabled.
 
@@ -52,7 +52,16 @@ curl -X DELETE https://your-domain.com/api/v1/links/summer-26 \
 
 ### MCP 客户端接入
 
-在后台「连接 Agent」复制 MCP 地址并生成自己的 API Key。客户端选择 **Streamable HTTP**，在请求头传入 `Authorization: Bearer <API Key>`。本地演示端点为 `http://127.0.0.1:4186/api/mcp`。服务按请求验证 Key 和当前组授权，采用无状态 JSON 响应。
+macOS + Node.js 20 及以上可以使用仓库内的独立连接器，从项目根目录执行：
+
+```sh
+node connector/edgeshort.mjs pair --origin https://vyu.cc --name "我的 Codex"
+codex mcp add edgeshort -- node "$PWD/connector/edgeshort.mjs" serve --origin https://vyu.cc
+```
+
+本地评审时两处 origin 都改为 `http://127.0.0.1:4193`。第一条命令显示 8 位短码并等待。登录同一站点，进入「连接 Agent」，输入短码，核对设备、账号、分组后点击「允许连接」。连接器持有独立随机证明，凭据仅通过兑换响应送到本机进程并保存至 macOS 钥匙串；第二条命令为 Codex 登记 stdio 连接器。连接后用 `list_groups` 确认权限。在「设备与密钥」中断开某台设备后，该凭据的下一次调用返回 401。组授权收回后，设备随账号失去相应组权限。配对有效期为 5 分钟，超时、拒绝或领取后不能再次兑换。若领取响应丢失，断开该设备后重新配对。
+
+其他支持远程 HTTP 的客户端可展开「手动 API Key 接入」，使用 **Streamable HTTP** 与 Bearer 鉴权。短码配对由本项目的连接器实现；普通 OAuth 登录客户端需要自行适配此配对协议。
 
 | 工具 | 参数示例 |
 |---|---|

@@ -9,7 +9,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="stylesheet" href="/admin/style.css?v=20261126-connect-agent">
+    <link rel="stylesheet" href="/admin/style.css?v=20261126-device-pair">
   </head>
   <body>
     <div class="app-shell">
@@ -162,16 +162,30 @@
     <dialog id="api-dialog" aria-labelledby="api-dialog-title">
       <div class="dialog-card api-dialog-card">
         <div class="dialog-header"><h2 id="api-dialog-title" data-i18n="apiAccess">连接 Agent</h2><button type="button" class="icon-button" data-close-api-dialog aria-label="关闭">×</button></div>
-        <section class="agent-connection" aria-labelledby="agent-endpoint-title">
-          <h3 id="agent-endpoint-title" data-i18n="endpointTitle">MCP 地址</h3>
-          <div class="agent-copy-row"><code id="mcp-endpoint"></code><button type="button" class="row-action" id="copy-mcp" data-i18n="copy">复制</button></div>
-          <p data-i18n="connectionHelp">在 Agent 中选择 Streamable HTTP，用下方生成的 API Key 作为 Bearer 凭据。</p>
+        <section class="agent-connection" aria-labelledby="pair-heading">
+          <h3 id="pair-heading" data-i18n="pairTitle">设备配对</h3>
+          <p data-i18n="pairHelp">让 Agent 在本机运行连接器，再输入它显示的 8 位配对码。</p>
+          <form id="pair-form"><label for="pair-code" data-i18n="pairCode">配对码</label>
+            <div class="api-create-row"><input id="pair-code" type="text" maxlength="12" required placeholder="XXXX-XXXX" autocomplete="off" spellcheck="false">
+              <button class="button button-primary" type="submit" data-i18n="inspectPair">查看申请</button></div></form>
+          <section id="pair-review" hidden><strong id="pair-device"></strong><p id="pair-rights"></p><p id="pair-until"></p>
+            <button type="button" class="button button-primary" id="approve-pair" data-i18n="allowPair">允许连接</button>
+            <button type="button" class="button button-quiet" id="deny-pair" data-i18n="denyPair">拒绝</button></section>
+          <p id="pair-result" role="status"></p>
+          <details id="connector-help"><summary data-i18n="setupConnector">首次使用本地连接器</summary>
+            <a href="/connector/edgeshort.mjs" download="edgeshort.mjs" data-i18n="downloadConnector">下载 macOS 连接器（Node.js 20+）</a>
+            <p data-i18n="connectorHelp">将文件保存在固定目录，在该目录执行以下命令。第一条等待你批准，第二条将连接器添加到 Codex。</p>
+            <pre id="connector-command"></pre></details>
           <h3 data-i18n="testPromptLabel">测试指令</h3>
           <div class="agent-copy-row"><span id="agent-test-prompt" data-i18n="testPrompt">列出我能管理的分组。</span><button type="button" class="row-action" id="copy-prompt" data-i18n="copy">复制</button></div>
         </section>
+        <section class="api-key-list-section"><div class="field-heading"><h3 data-i18n="activeApiKeys">API Keys</h3><span class="field-note" id="api-keys-summary"></span></div><div class="api-key-list" id="api-key-list"></div></section>
+        <details class="api-guide" id="manual-key"><summary data-i18n="manualKey">手动 API Key 接入</summary>
+          <div class="agent-copy-row"><code id="mcp-endpoint"></code><button type="button" class="row-action" id="copy-mcp" data-i18n="copy">复制</button></div>
+          <p data-i18n="connectionHelp">在 Agent 中选择 Streamable HTTP，用下方生成的 API Key 作为 Bearer 凭据。</p>
         <form id="api-key-form" class="api-key-form"><label for="api-key-name" data-i18n="apiKeyName">密钥名称</label><div class="api-create-row"><input id="api-key-name" type="text" maxlength="48" data-i18n-placeholder="apiKeyNamePlaceholder" placeholder="例如：自动化脚本"><button class="button button-primary" id="generate-api-key" type="submit" data-i18n="generateApiKey">生成 API Key</button></div></form>
         <section class="api-key-result" id="api-key-result" hidden><div><strong data-i18n="apiKeyCreated">请立即保存此 API Key</strong><p data-i18n="apiKeyOnce">为了安全起见，关闭后将无法再次查看完整密钥。</p></div><div class="api-key-value"><input id="api-key-value" type="text" readonly><button class="button button-quiet" id="copy-api-key" type="button" data-i18n="copy">复制</button></div></section>
-        <section class="api-key-list-section"><div class="field-heading"><h3 data-i18n="activeApiKeys">API Keys</h3><span class="field-note" id="api-keys-summary"></span></div><div class="api-key-list" id="api-key-list"></div></section>
+        </details>
         <details class="api-guide" id="developer-docs">
           <summary data-i18n="developerDocs">开发者文档</summary>
           <p data-i18n="agentAuth">终端示例从 EDGESHORT_KEY 环境变量读取 API Key。</p>
@@ -186,6 +200,6 @@
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="/admin/app.js?v=20261126-connect-agent" defer></script>
+    <script src="/admin/app.js?v=20261126-device-pair" defer></script>
   </body>
 </html>

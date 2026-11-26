@@ -3,7 +3,7 @@
   "info": {
     "title": "EdgeShort 管理 API",
     "version": "1.0.0",
-    "description": "在后台「连接 Agent」生成 Key；普通用户只可管理获授权分组。MCP 接入见 Agent 指南。"
+    "description": "在后台「连接 Agent → 手动 API Key 接入」生成 Key；普通用户只可管理获授权分组。MCP 接入见 Agent 指南。"
   },
   "servers": [
     {

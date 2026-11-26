@@ -8,6 +8,7 @@ function publicApiKey(record) {
   return {
     id: record.id,
     name: record.name,
+    source: record.source === "device" ? "device" : "manual",
     prefix: record.prefix,
     createdAt: record.createdAt,
     lastUsedAt: record.lastUsedAt || null,

@@ -233,8 +233,11 @@ export function makeRecordId() {
 // load exactly one record instead of scanning every key.
 export const API_KEY_FORMAT = /^esk_([0-9a-f]{16})\.[A-Za-z0-9_-]{43}$/;
 
-export function makeApiKey() {
-  const id = Array.from(crypto.getRandomValues(new Uint8Array(8)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+export function makeApiKeyId() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(8)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export function makeApiKey(id = makeApiKeyId()) {
   return { id, value: `esk_${id}.${toBase64Url(crypto.getRandomValues(new Uint8Array(32)))}` };
 }
 

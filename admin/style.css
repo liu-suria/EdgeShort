@@ -266,3 +266,13 @@ dialog::backdrop { background: rgba(58,35,20,.34); backdrop-filter: blur(4px); }
 
 .list-pager { display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding: 8px 15px; border-top: 1px solid var(--line); font-size: .8rem; }
 .list-pager button { min-height: 30px; }
+
+#pair-form { margin: 12px 0 6px; }
+#pair-code { font: 600 1rem ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+#pair-review { background: var(--bg); border: 1px solid var(--line); padding: 12px; border-radius: 8px; margin-top: 8px; }
+#pair-review strong { overflow-wrap: anywhere; }
+#pair-result:empty { display: none; }
+#connector-help { margin: 9px 0; font-size: .8rem; color: var(--muted); }
+#connector-help summary { cursor: pointer; }
+#connector-help a { display: inline-block; margin-top: 8px; color: var(--accent-ink); }
+#connector-command { overflow-x: auto; padding: 7px; background: var(--bg); }
